@@ -1,0 +1,277 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 168 70% 50%;
+    --primary-foreground: 0 0% 98%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 7%;
+
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 35%;
+
+    --accent: 0 0% 94%;
+    --accent-foreground: 0 0% 7%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+
+    --warning: 35 92% 52%;
+    --warning-foreground: 210 40% 98%;
+
+    --info: 217 91% 60%;
+    --info-foreground: 210 40% 98%;
+
+    --border: 0 0% 80%;
+    --input: 0 0% 80%;
+    --ring: 0 0% 0%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body {
+    height: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    @apply bg-background text-foreground;
+    display: flex;
+    overflow-y: visible;
+  }
+
+  /* Ensure Next.js root elements take full height */
+  body > div:first-child,
+  body > div:first-child > div:first-child,
+  body > div:first-child > div:first-child > div:first-child {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+    overflow: visible;
+  }
+}
+
+/* Add custom animations and transitions */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+  }
+
+  .transition-all-300 {
+    transition: all 0.3s ease;
+  }
+
+  .hover-scale {
+    transition: transform 0.2s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.02);
+  }
+
+  .card-shadow {
+    box-shadow:
+      0 4px 8px -1px rgba(0, 0, 0, 0.12),
+      0 2px 4px -1px rgba(0, 0, 0, 0.08);
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .card-shadow:hover {
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.12),
+      0 4px 6px -2px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .text-enhanced {
+    text-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.05);
+  }
+
+  .border-enhanced {
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  .subtle-shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Absolutely positioned header elements */
+.absolute-header-elements {
+  position: fixed;
+  top: 0;
+  right: 24px; /* Fixed right margin */
+  height: 96px; /* Fixed height (24 * 4px = 96px) */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10000;
+}
+
+/* Consistent sizing for header elements */
+.absolute-header-icon {
+  height: 44px; /* Fixed height (11 * 4px = 44px) */
+  width: 44px; /* Fixed width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.absolute-header-credits {
+  height: 44px; /* Fixed height */
+  width: 140px; /* Fixed width */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0 20px;
+}
+
+.absolute-header-user {
+  height: 44px; /* Fixed height */
+  width: 280px; /* Fixed width */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.absolute-header-user:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Custom spinner with isolation from parent transforms */
+/* Custom spinner animation */
+.soreal-spinner-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto;
+}
+
+.soreal-spinner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid hsl(var(--primary) / 0.2);
+  border-top-color: hsl(var(--primary));
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+@keyframes border-beam-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Google Translate overrides */
+.goog-te-banner-frame.skiptranslate,
+.goog-logo-link,
+.goog-te-gadget,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-text-highlight {
+  display: none !important;
+}
+
+/* Prevent Google Translate from adding 'top: 40px' to the body */
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+/* Custom styling for Google Translate dropdown - hide until we customize it */
+.goog-te-combo {
+  display: none;
+}
+
+/* Hide the Google Translate attribution */
+.VIpgJd-ZVi9od-l4eHX-hSRGPd,
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+  display: none !important;
+}
+
+/* Fix for translated buttons and inputs */
+.translated-ltr .primary-button,
+.translated-ltr button,
+.translated-ltr input {
+  font-family: inherit !important;
+}
+
+/* Ensure translated elements maintain our font styling */
+.translated-ltr * {
+  font-family: inherit;
+}
+
+.signup-checkbox-container input {
+  position: relative !important;
+}
+
+body {
+  background-color: #fff !important;
+}
