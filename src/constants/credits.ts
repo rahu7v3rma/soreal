@@ -1,0 +1,4 @@
+export const STANDARD_IMAGE_CREDITS = 5;
+export const PREMIUM_IMAGE_CREDITS = 60;
+export const UPSCALE_IMAGE_CREDITS = 4;
+export const REMOVE_BACKGROUND_IMAGE_CREDITS = 4;

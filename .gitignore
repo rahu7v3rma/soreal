@@ -1,0 +1,33 @@
+# Build output
+.next
+out/
+dist/
+tsconfig.tsbuildinfo
+
+# Node & package files
+node_modules/
+*.log
+
+# Environment files
+.env*
+.vercel
+
+# OS & editor files
+.DS_Store
+.vscode/
+Thumbs.db
+ehthumbs.db
+
+# Tests
+*.test.js
+*.spec.js
+*test*.js
+test/
+tests/
+__tests__/
+
+# Coverage
+coverage/
+
+# Draft/internal docs
+docs/drafts/

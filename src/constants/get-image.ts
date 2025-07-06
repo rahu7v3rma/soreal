@@ -1,0 +1,1 @@
+export const getImageApiUrl = "https://api.soreal.app/get-image";

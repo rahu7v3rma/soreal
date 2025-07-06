@@ -1,0 +1,689 @@
+"use client";
+
+const Page = () => {
+  return (
+    <div className="min-h-screen bg-background w-screen">
+      <div className="pt-24 pb-12 text-center">
+        <h1 className="text-4xl font-semibold tracking-[-0.022em] mb-4">
+          Privacy Policy
+        </h1>
+        <p className="text-xl font-light text-muted-foreground">
+          Soreal – a service of Soreal AI, LLC
+        </p>
+        <p className="text-sm font-light text-muted-foreground mt-2">
+          Effective Date: May 19, 2025
+        </p>
+      </div>
+
+      <div className="max-w-[900px] mx-auto px-6 pb-24">
+        <div className="prose prose-gray max-w-none">
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              1. Who We Are
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed">
+              Soreal AI, LLC ("Soreal," "we," "our," or "us") operates the Soreal
+              website, API, and related services (collectively, the "Service"). This
+              Privacy Policy describes how we collect, use, disclose, and protect
+              personal information when you use our Service. For purposes of data
+              protection laws (e.g. GDPR), Soreal AI, LLC is the controller of your
+              personal information.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              2. Age Restriction
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed">
+              Our Service is limited to users 18 years of age or older. We do not
+              knowingly collect personal information from anyone under 18. If you are
+              under 18, you must not use the Service. If we become aware that a person
+              under 18 has provided us with personal data, we will delete such data.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              3. Information We Collect
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-6">
+              We collect various types of information in order to provide and improve
+              the Service. The categories of data we collect include:
+            </p>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-3 px-4 text-left font-medium text-gray-900">
+                      Category
+                    </th>
+                    <th className="py-3 px-4 text-left font-medium text-gray-900">
+                      Details & Examples
+                    </th>
+                    <th className="py-3 px-4 text-left font-medium text-gray-900">
+                      Source
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Account Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Name, email address, password hash, subscription level, payment
+                      status
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Provided by you
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Payment Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Billing name, card last 4 digits, billing ZIP/postal code.
+                      <br />
+                      <strong>Note:</strong> Full payment card details are handled by
+                      Stripe; Soreal never stores your full card number.
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Provided by you / via Stripe
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Prompt & Asset Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Text prompts you enter, any reference images you upload, and the
+                      images generated by the Service ("Assets"), along with associated
+                      metadata (e.g. generation settings).
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Provided by you; Assets are created by our models
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Device & Log Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Technical information such as your IP address, browser type,
+                      operating system, referring URL, pages viewed, and timestamps of
+                      requests.
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Collected automatically
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Analytics Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Usage metrics about how you interact with our Service, e.g.
+                      feature usage, page views, button clicks, session length.
+                      Collected via Google Analytics 4 and our error/performance
+                      monitoring tool Sentry.
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Collected automatically
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Cookie Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Data collected through cookies or similar technologies. (See
+                      Section 5 below for details.)
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Collected automatically
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Inferred Data
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Derivations we make from other data – for example, an approximate
+                      location (city/country) inferred from your IP address, or product
+                      usage patterns inferred from how you use the Service.
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Derived by us
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              4. How We Use Information
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-6">
+              We use the collected information for the following purposes, relying on
+              different legal bases as appropriate:
+            </p>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="py-3 px-4 text-left font-medium text-gray-900">
+                      Purpose
+                    </th>
+                    <th className="py-3 px-4 text-left font-medium text-gray-900">
+                      Explanation & Legal Basis*
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Provide the Service
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      To create and manage your account, authenticate you at login,
+                      render the website/app interface, process your prompts to generate
+                      images, and deliver responses via the API. (Legal basis: Contract
+                      – this processing is necessary to provide the Service you
+                      requested.)
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Improve & Secure
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      To debug and fix errors (using tools like Sentry for error
+                      monitoring), prevent fraud and abuse, analyze performance, and
+                      test new features. (Legal basis: Legitimate interests – we have a
+                      legitimate interest in maintaining and improving the security and
+                      quality of our Service.)
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Billing & Payments
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      To process subscription payments, manage billing (through Stripe),
+                      and detect fraudulent transactions. (Legal basis: Contract for
+                      payment processing, and legitimate interests for fraud
+                      prevention.)
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Communications
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      To send you service-related communications: account confirmations,
+                      invoices/receipts, technical or security alerts, and product
+                      updates or new feature announcements. We may also send marketing
+                      or promotional emails only if you have consented or if otherwise
+                      permitted by law. (Legal basis: Legitimate interests for essential
+                      communications; consent for marketing where required.)
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Model Training (Opt-out)
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      Paid-tier users: By default, we may use your prompts and generated
+                      images to improve our AI models and future versions of the
+                      Service. You have the choice to opt out if you do not want your
+                      data used for model training. (Legal basis: Consent – we treat
+                      your continued use without opting out as permission, where allowed
+                      by law.)
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-200">
+                    <td className="py-3 px-4 align-top font-medium">
+                      Legal Compliance
+                    </td>
+                    <td className="py-3 px-4 text-gray-700 font-light">
+                      To comply with applicable laws and regulations, respond to lawful
+                      requests by authorities, resolve disputes, and enforce our terms
+                      and policies. (Legal basis: Legal obligation.)
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-gray-700 font-light text-sm mt-4">
+              **Where the GDPR/UK GDPR applies, we rely on the legal bases noted in
+              parentheses above for the corresponding purposes.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section id="cookies-similar-tech" className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              5. Cookies & Similar Technologies
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-6">
+              We use cookies and similar tracking technologies (like pixels or local
+              storage) to collect information and enhance your experience. The types of
+              cookies we use and why we use them are:
+            </p>
+            <ul className="list-disc pl-6 space-y-4 text-gray-700 font-light mb-6">
+              <li>
+                <strong>Essential Cookies:</strong> These are necessary for the Service
+                to function properly. For example, we use essential cookies for login
+                sessions, session routing, and CSRF protection. You cannot disable
+                these without breaking core functionality of the Service.
+              </li>
+              <li>
+                <strong>Analytics/Performance Cookies:</strong> These cookies help us
+                understand how users interact with our Service. For instance, Google
+                Analytics 4 cookies allow us to gather anonymized usage statistics, and
+                Sentry may use identifiers to track error events or performance
+                metrics. In EU/UK regions, analytics cookies will only be set if you
+                opt-in via the cookie consent banner. For users elsewhere, you can opt
+                out of analytics tracking using the link provided in our website
+                footer.
+              </li>
+              <li>
+                <strong>Functional Cookies:</strong> These cookies remember your
+                preferences and settings to provide a better user experience (e.g. your
+                theme choice, language selection, or other UI customizations). You can
+                manage or delete functional cookies through your browser settings.
+              </li>
+              <li>
+                <strong>Advertising Cookies:</strong> We use limited first-party
+                tracking cookies/pixels to show you Soreal advertisements on other
+                websites (also known as retargeting). These advertising trackers are
+                off by default. They will only be enabled if you explicitly opt-in (for
+                EU/UK users, via the cookie banner; globally, via an opt-in toggle in
+                your account settings). We do not use third-party ad network cookies
+                nor any invasive profiling.
+              </li>
+            </ul>
+            <p className="text-gray-700 font-light leading-relaxed">
+              We never sell your personal data and do not share it with data brokers or
+              unrelated third parties. Advertising cookies are never set unless you
+              have explicitly opted-in.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              6. Sharing & Disclosure
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              We do not disclose your personal information to outside parties except in
+              the following circumstances and with appropriate safeguards:
+            </p>
+            <ul className="list-disc pl-6 space-y-3 text-gray-700 font-light mb-4">
+              <li>
+                <strong>Service Providers:</strong> We share data with trusted
+                third-party service providers who process information on our behalf and
+                under our instructions. Examples include payment processors (e.g.
+                Stripe for billing), database and hosting providers (e.g. Supabase,
+                AWS for data and image storage), and similar support services. These
+                partners are bound by contracts (including data processing agreements)
+                to protect your information and only use it for the purposes we specify.
+              </li>
+              <li>
+                <strong>Analytics and Monitoring:</strong> We use analytics and
+                error-monitoring tools that may receive some of your data. This
+                includes Google Analytics 4 (which receives usage statistics under a
+                randomized user identifier) and Sentry (which receives error reports
+                and performance data, potentially including user agent or IP address).
+                These tools are configured to avoid collecting directly identifying
+                information, and they operate under agreements that protect your data.
+              </li>
+              <li>
+                <strong>Legal or Safety Requirements:</strong> We may disclose
+                information if required to do so by law or in a good-faith belief that
+                such disclosure is necessary to comply with a legal obligation (e.g.
+                valid subpoena or court order), to protect our rights or property, to
+                enforce our terms of service, or to protect the safety of our users or
+                the public.
+              </li>
+              <li>
+                <strong>Corporate Transactions:</strong> If we are involved in a
+                merger, acquisition, bankruptcy, financing due diligence,
+                reorganization, or sale of all or part of our business, your
+                information may be transferred as part of that transaction. If such a
+                transfer occurs, we will ensure the recipient agrees to handle your
+                personal data in a manner that is consistent with this Privacy Policy.
+              </li>
+            </ul>
+            <p className="text-gray-700 font-light leading-relaxed">
+              Importantly, we do not sell your personal information and we do not share
+              your data with third parties for their own marketing or advertising
+              purposes.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              7. International Data Transfers
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              Soreal is based in the United States, and the data we collect is
+              primarily stored and processed on servers located in the U.S. (for
+              example, on Supabase and AWS infrastructure). This means that if you are
+              located outside the U.S. (such as in the EEA, United Kingdom, or
+              Switzerland), your personal data may be transferred to and processed in
+              the United States or other jurisdictions that may not have the same data
+              protection laws as your home country.
+            </p>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              To ensure an adequate level of protection for personal data transferred
+              internationally, we rely on the following safeguards:
+            </p>
+            <ul className="list-disc pl-6 space-y-3 text-gray-700 font-light">
+              <li>
+                <strong>Standard Contractual Clauses:</strong> For transfers of
+                personal data from the EEA/UK/Switzerland to the U.S. (or other
+                countries not deemed adequate by the EU/UK), we implement the European
+                Commission's Standard Contractual Clauses (SCCs) in our agreements with
+                service providers, which contractually require your data to be
+                protected to EU privacy standards.
+              </li>
+              <li>
+                <strong>Data Processing Agreements:</strong> We have Data Processing
+                Addenda/Agreements in place with all our relevant sub-processors,
+                requiring them to safeguard personal data and use it only for the
+                services they provide to us.
+              </li>
+              <li>
+                <strong>Technical Measures:</strong> We apply additional technical
+                protections such as encryption of data in transit (e.g., HTTPS secure
+                connections) and at rest, pseudonymization of user identifiers where
+                possible, and access controls. These measures help protect your data
+                during transfer and storage, regardless of where it is processed.
+              </li>
+            </ul>
+            <p className="text-gray-700 font-light leading-relaxed mt-4">
+              If you have questions about our international data transfer practices,
+              feel free to contact us (see Section 13 below).
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              8. Data Retention & Deletion
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              We retain your personal information only for as long as necessary to
+              fulfill the purposes described in this Policy, or as required by law. Our
+              retention practices are:
+            </p>
+            <ul className="list-disc pl-6 space-y-3 text-gray-700 font-light mb-4">
+              <li>
+                <strong>User Content:</strong> Prompts, uploads, and generated Assets
+                are generally stored indefinitely in your account history by default.
+                This allows you to revisit your past creations. However, you are in
+                control of this content:
+                <ul className="list-disc pl-6 mt-2 space-y-1">
+                  <li>
+                    You may delete specific prompts or generated images from your
+                    account/dashboard at any time. Once deleted, those items will no
+                    longer be accessible through the Service (though they may remain in
+                    our secure backups for a limited period until those backups cycle
+                    out).
+                  </li>
+                  <li>
+                    You may request full deletion of your account. If you initiate an
+                    account deletion, we will erase all personal data and Assets
+                    associated with your account from our active systems within 30
+                    days. After deletion, we will only retain whatever information is
+                    strictly necessary for legal compliance or fraud prevention. For
+                    example, minimal records may be kept to comply with financial
+                    reporting laws or to detect users who were banned for abuse. Any
+                    such retained data will be protected and isolated from routine use.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <strong>Logs and Backups:</strong> Server logs and backup archives are
+                stored for a limited duration and are automatically purged or
+                overwritten on a rolling schedule. We retain these for purposes like
+                troubleshooting, security monitoring, and ensuring service continuity.
+                Once they expire, they are deleted or anonymized.
+              </li>
+              <li>
+                <strong>Payment Records:</strong> We may retain payment and
+                subscription records (through Stripe) as long as required for
+                accounting, audits, and tax obligations.
+              </li>
+            </ul>
+            <p className="text-gray-700 font-light leading-relaxed">
+              After the applicable retention periods, or upon your verified request for
+              erasure, we will either securely delete or anonymize your personal data
+              so that it can no longer be linked to you. Please note that due to the
+              nature of caching and distributed systems, there may be slight delays in
+              removal from all systems. We will endeavor to complete the deletion
+              process as promptly as possible and within any deadlines required by law.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              9. Your Rights
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-6">
+              Depending on your location and applicable privacy laws, you may have
+              certain rights regarding your personal data. We honor all rights granted
+              to users under relevant data protection laws:
+            </p>
+            <ul className="list-disc pl-6 space-y-4 text-gray-700 font-light mb-6">
+              <li>
+                <strong>EEA/UK/Switzerland (GDPR):</strong> If you are in the European
+                Economic Area, United Kingdom, or Switzerland, you have the right to
+                access the personal data we hold about you, to rectify (correct) any
+                data that is inaccurate, to erase your data (the "right to be
+                forgotten"), and to restrict or object to certain processing of your
+                data. You also have the right to data portability, meaning you can
+                request a copy of the personal data you provided to us in a
+                machine-readable format. Additionally, if we rely on your consent for
+                any processing, you have the right to withdraw consent at any time
+                (this will not affect the lawfulness of processing done before you
+                withdrew consent).
+              </li>
+              <li>
+                <strong>California (CCPA/CPRA):</strong> If you are a California
+                resident, you have the right to know what personal information we
+                collect, how we use it, and the categories of third parties with whom
+                we share it. You can request that we disclose to you the specific
+                pieces of personal information we have about you, and you have the
+                right to delete personal information (with certain exceptions as
+                provided by law). You also have the right to correct inaccurate
+                personal information and the right to opt-out of the "sale" or
+                "sharing" of your personal information. Please note that Soreal does
+                not sell personal data as defined under CCPA, nor do we share it for
+                cross-context behavioral advertising without consent. We will not
+                discriminate against you for exercising any of your CCPA rights
+                (meaning we won't deny you services or provide a different quality of
+                service just because you exercised your privacy rights).
+              </li>
+              <li>
+                <strong>Other Regions:</strong> Regardless of where you live, we
+                provide all our users with certain core controls over their data. You
+                can export your data and delete your account at any time using the
+                self-service tools in your account settings. You can also manage your
+                cookie preferences and advertising opt-outs through our website and
+                settings. If any other privacy laws apply to you (for example, you are
+                in a jurisdiction with additional rights), we will respect those rights
+                as well. For instance, residents of some jurisdictions may have rights
+                to complain to a regulator, or to specify authorized agents to make
+                requests on their behalf – we honor those rights in accordance with
+                applicable law.
+              </li>
+            </ul>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              <strong>Exercising Your Rights:</strong> You may exercise your privacy
+              rights by contacting us at{" "}
+              <a
+                href="mailto:privacy@soreal.app"
+                className="text-[#2fceb9] hover:underline"
+              >
+                privacy@soreal.app
+              </a>{" "}
+              or via the account Settings page (where available for certain requests
+              like data export or deletion). We will need to verify your identity
+              before processing certain requests (for example, by confirming control of
+              your account or asking for additional information). We will respond to
+              your request within the timeframe required by law (generally within 30
+              days for GDPR-related requests, and 45 days for CCPA requests, with
+              extensions if permitted).
+            </p>
+            <p className="text-gray-700 font-light leading-relaxed">
+              If you are in the EEA/UK/CH and believe we have not adequately addressed
+              your concerns, you have the right to contact your local Data Protection
+              Authority. California residents may contact the California Attorney
+              General if they have concerns about how we handled a request. We
+              encourage you to contact us first with any questions or concerns, and we
+              will do our best to resolve them.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              10. Security
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed">
+              We take the security of your personal information very seriously. Soreal
+              implements a variety of industry-standard security measures to protect
+              your data from unauthorized access, use, or disclosure. These measures
+              include, for example: the use of HTTPS encryption for all data in
+              transit, encryption of sensitive data at rest, strict access controls
+              following the principle of least privilege (only authorized staff with a
+              need-to-know can access user data), and regular security audits and
+              penetration testing of our systems. We also monitor for potential
+              vulnerabilities and attacks, and we have incident response plans ready.
+            </p>
+            <p className="text-gray-700 font-light leading-relaxed mt-4">
+              However, please understand that no security measure is 100% perfect.
+              While we strive to protect your information, we cannot guarantee absolute
+              security. In the event of a data breach that affects your personal
+              information, we will notify you and the relevant authorities as required
+              by law, and we will take all necessary steps to mitigate the incident
+              and prevent future occurrences.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              11. Third-Party Links
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed">
+              Our Service may contain links to external websites or services that are
+              not operated by Soreal. For example, our website might link to our social
+              media pages, external resources, or third-party content. If you click on
+              a third-party link, you will be directed to that third party's site.
+              Note: This Privacy Policy does not apply to information collected on any
+              third-party websites or services. Those sites have their own privacy
+              policies, and we are not responsible for their content, security, or
+              privacy practices. We recommend that you review the privacy policy of any
+              external site you visit before providing any personal information.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              12. Changes to This Policy
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed">
+              We may update or revise this Privacy Policy from time to time to reflect
+              changes in our practices or for other operational, legal, or regulatory
+              reasons. If we make material changes to the way we treat your personal
+              information, we will provide you with advance notice. For example, we may
+              notify you by email and/or by placing a prominent notice on our website
+              or within the app at least 30 days prior to any significant changes
+              taking effect. In some cases (for less substantive updates), we may
+              simply update the "Effective Date" at the top of this Policy and post the
+              revised Policy on our site. We encourage you to review this page
+              periodically for the latest information on our privacy practices.
+            </p>
+            <p className="text-gray-700 font-light leading-relaxed mt-4">
+              Your continued use of the Service after the updated Privacy Policy has
+              become effective constitutes your acceptance of the changes. If you do
+              not agree with any updates to the Policy, you should stop using the
+              Service and, if you wish, delete your account or exercise other rights
+              described above.
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <section className="mb-12">
+            <h2 className="text-2xl font-semibold tracking-[-0.015em] mb-6">
+              13. Contact Us
+            </h2>
+            <p className="text-gray-700 font-light leading-relaxed mb-6">
+              If you have any questions, concerns, or requests regarding this Privacy
+              Policy or how Soreal handles your data, please do not hesitate to
+              contact us:
+            </p>
+            <div className="mb-6">
+              <p className="text-gray-700 font-light leading-relaxed mb-2">
+                <strong>Mailing Address:</strong>
+              </p>
+              <p className="text-gray-700 font-light leading-relaxed">
+                Soreal AI, LLC<br />
+                8 The Green, #18947<br />
+                Dover, DE 19901, USA
+              </p>
+            </div>
+            <p className="text-gray-700 font-light leading-relaxed mb-4">
+              <strong>Email:</strong>{" "}
+              <a
+                href="mailto:privacy@soreal.app"
+                className="text-[#2fceb9] hover:underline"
+              >
+                privacy@soreal.app
+              </a>
+            </p>
+            <p className="text-gray-700 font-light leading-relaxed">
+              We will do our best to respond to your inquiry as soon as possible
+              (typically within 5 business days for privacy-related requests).
+            </p>
+          </section>
+
+          <div className="border-t border-gray-200 my-8"></div>
+
+          <p className="text-sm text-gray-500 font-light text-center">
+            Last revised: May 19, 2025
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Page;
