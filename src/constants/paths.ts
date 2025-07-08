@@ -21,6 +21,7 @@ export const publicPaths = [
   "/api-docs/openapi",
   "/api/openapi.json",
   "/confirm-email",
+  "/admin/login",
 ];
 
 export const userPaths = [
@@ -64,6 +65,13 @@ export const userPaths = [
   "/onboarding",
   "/api/enhance-prompt",
   "/billing",
+];
+
+export const adminPaths = [
+  "/admin/dashboard",
+  "/admin/dashboard/blogs",
+  "/admin/dashboard/blogs/create",
+  "/admin/dashboard/blogs/edit",
 ];
 
 export const dashboardPaths = [

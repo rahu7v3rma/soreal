@@ -3,11 +3,14 @@
 import { useToast } from "@/components/ui/toast";
 import { ACCESS_TOKEN_COOKIE_KEY } from "@/constants/cookies";
 import { planNames } from "@/constants/subscription";
+import { USER_ROLES } from "@/constants/user-role";
 import { useAxios } from "@/hooks/axios";
 import usePaths from "@/hooks/paths";
 import {
   removeUserSubscriptionCookie,
   setUserSubscriptionCookie,
+  setUserRoleCookie,
+  removeUserRoleCookie,
 } from "@/lib/cookies/client";
 import { supabase } from "@/lib/supabase/client";
 import { generateId } from "@/lib/utils/common";
@@ -43,6 +46,11 @@ export interface UserProfile {
   aiExperience: string | null;
   usageGoals: Array<string> | null;
   interests: Array<string> | null;
+  cookies: Array<string> | null;
+}
+
+export interface UserRole {
+  role_type: string | null;
 }
 
 export interface UserTopup {
@@ -75,6 +83,17 @@ export interface Generation {
   credit_requirement: number | null;
 }
 
+export interface Blog {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  title: string | null;
+  content: string | null;
+  archived: boolean | null;
+  slug: string | null;
+  featured_image_url: string | null;
+}
+
 export interface ApiKey {
   id: string;
   user_id: string;
@@ -90,9 +109,11 @@ interface SupabaseContextType {
   session: Session | null;
   authUser: AuthUser | null;
   userProfile: UserProfile | null;
+  userRole: UserRole | null;
   userTopup: UserTopup | null;
   userSubscription: UserSubscription | null;
   generations: Generation[];
+  blogs: Blog[];
   apiKeys: ApiKey[];
   changePasswordEmail: string | null;
   setChangePasswordEmail: (email: string) => void;
@@ -136,6 +157,8 @@ interface SupabaseContextType {
   getAuthUserLoading: boolean;
   getUserProfile: () => Promise<boolean>;
   getUserProfileLoading: boolean;
+  getUserRole: () => Promise<string | null>;
+  getUserRoleLoading: boolean;
   getUserTopup: () => Promise<boolean>;
   getUserTopupLoading: boolean;
   getUserSubscription: () => Promise<boolean>;
@@ -146,6 +169,43 @@ interface SupabaseContextType {
   deleteUserLoading: boolean;
   getUserGenerations: () => Promise<boolean>;
   getUserGenerationsLoading: boolean;
+  getBlogs: () => Promise<boolean>;
+  getBlogsLoading: boolean;
+  getBlog: (id: string) => Promise<Blog | null>;
+  getBlogLoading: boolean;
+  createBlog: ({
+    title,
+    content,
+    slug,
+    featuredImageUrl,
+    archived,
+  }: {
+    title: string;
+    content: string;
+    slug: string;
+    featuredImageUrl?: string;
+    archived?: boolean;
+  }) => Promise<boolean>;
+  createBlogLoading: boolean;
+  updateBlog: (
+    id: string,
+    {
+      title,
+      content,
+      slug,
+      featuredImageUrl,
+      archived,
+    }: {
+      title?: string;
+      content?: string;
+      slug?: string;
+      featuredImageUrl?: string;
+      archived?: boolean;
+    }
+  ) => Promise<boolean>;
+  updateBlogLoading: boolean;
+  deleteBlog: (id: string) => Promise<boolean>;
+  deleteBlogLoading: boolean;
   getApiKeys: () => Promise<boolean>;
   getApiKeysLoading: boolean;
   updateUserProfile: ({
@@ -157,6 +217,7 @@ interface SupabaseContextType {
     interests,
     isOnboarded,
     avatarUrl,
+    cookies,
   }: {
     username?: string;
     bio?: string;
@@ -166,6 +227,7 @@ interface SupabaseContextType {
     interests?: string[];
     isOnboarded?: boolean;
     avatarUrl?: string;
+    cookies?: string[];
   }) => Promise<boolean>;
   updateUserProfileLoading: boolean;
   addApiKey: ({
@@ -185,7 +247,7 @@ interface SupabaseContextType {
   updateApiKeyLoading: boolean;
   uploadImage: (
     file: File,
-    imageType: "reference" | "avatar"
+    imageType: "reference" | "avatar" | "blog"
   ) => Promise<string | null>;
   uploadImageLoading: boolean;
   deleteUserGeneration: (imageUrl: string) => Promise<boolean>;
@@ -211,10 +273,11 @@ const SupabaseContext = createContext<SupabaseContextType>({
   session: null,
   authUser: null,
   userProfile: null,
-
+  userRole: null,
   userTopup: null,
   userSubscription: null,
   generations: [],
+  blogs: [],
   apiKeys: [],
   changePasswordEmail: null,
   setChangePasswordEmail: () => {},
@@ -239,7 +302,8 @@ const SupabaseContext = createContext<SupabaseContextType>({
   getAuthUserLoading: false,
   getUserProfile: () => Promise.resolve(false),
   getUserProfileLoading: false,
-
+  getUserRole: () => Promise.resolve(null),
+  getUserRoleLoading: false,
   getUserTopup: () => Promise.resolve(false),
   getUserTopupLoading: false,
   getUserSubscription: () => Promise.resolve(false),
@@ -250,6 +314,16 @@ const SupabaseContext = createContext<SupabaseContextType>({
   deleteUserLoading: false,
   getUserGenerations: () => Promise.resolve(false),
   getUserGenerationsLoading: false,
+  getBlogs: () => Promise.resolve(false),
+  getBlogsLoading: false,
+  getBlog: () => Promise.resolve(null),
+  getBlogLoading: false,
+  createBlog: () => Promise.resolve(false),
+  createBlogLoading: false,
+  updateBlog: () => Promise.resolve(false),
+  updateBlogLoading: false,
+  deleteBlog: () => Promise.resolve(false),
+  deleteBlogLoading: false,
   getApiKeys: () => Promise.resolve(false),
   getApiKeysLoading: false,
   updateUserProfile: () => Promise.resolve(false),
@@ -283,11 +357,12 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [userTopup, setUserTopup] = useState<UserTopup | null>(null);
   const [userSubscription, setUserSubscription] =
     useState<UserSubscription | null>(null);
   const [generations, setGenerations] = useState<Generation[]>([]);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [changePasswordEmail, setChangePasswordEmail] = useState<string | null>(
     null
@@ -306,6 +381,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [getAuthUserLoading, setGetAuthUserLoading] = useState<boolean>(false);
   const [getUserProfileLoading, setGetUserProfileLoading] =
     useState<boolean>(false);
+  const [getUserRoleLoading, setGetUserRoleLoading] = useState<boolean>(false);
   const [updateUserProfileLoading, setUpdateUserProfileLoading] =
     useState(false);
 
@@ -317,6 +393,11 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [deleteUserLoading, setDeleteUserLoading] = useState(false);
   const [getUserGenerationsLoading, setGetUserGenerationsLoading] =
     useState(false);
+  const [getBlogsLoading, setGetBlogsLoading] = useState(false);
+  const [getBlogLoading, setGetBlogLoading] = useState(false);
+  const [createBlogLoading, setCreateBlogLoading] = useState(false);
+  const [updateBlogLoading, setUpdateBlogLoading] = useState(false);
+  const [deleteBlogLoading, setDeleteBlogLoading] = useState(false);
   const [getApiKeysLoading, setGetApiKeysLoading] = useState(false);
   const [addApiKeyLoading, setAddApiKeyLoading] = useState(false);
   const [updateApiKeyLoading, setUpdateApiKeyLoading] = useState(false);
@@ -455,6 +536,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
           aiExperience: getUserProfile.data.ai_experience || null,
           usageGoals: getUserProfile.data.usage_goals || null,
           interests: getUserProfile.data.interests || null,
+          cookies: getUserProfile.data.cookies || null,
         });
 
         return true;
@@ -483,6 +565,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         aiExperience: createUserProfile.data.ai_experience || null,
         usageGoals: createUserProfile.data.usage_goals || null,
         interests: createUserProfile.data.interests || null,
+        cookies: createUserProfile.data.cookies || null,
       });
 
       return true;
@@ -988,6 +1071,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         aiExperience: getUserProfile.data.ai_experience || null,
         usageGoals: getUserProfile.data.usage_goals || null,
         interests: getUserProfile.data.interests || null,
+        cookies: getUserProfile.data.cookies || null,
       });
 
       return true;
@@ -1008,6 +1092,67 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const getUserRole = async () => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      setGetUserRoleLoading(true);
+
+      const getUserRole = await supabase
+        .from("user_role")
+        .select("*")
+        .eq("user_id", authUser?.id)
+        .single();
+
+      if (!getUserRole.data) {
+        // No role found, return null
+        setUserRole(null);
+        removeUserRoleCookie();
+        return null;
+      }
+
+      const userRole = getUserRole.data.role_type || null;
+
+      setUserRole({
+        role_type: userRole,
+      });
+
+      // Set user role cookie
+      if (userRole) {
+        setUserRoleCookie({
+          role_type: userRole,
+        });
+      }
+
+      return userRole;
+    } catch (error: unknown) {
+      if (isDashboardPath) {
+        Sentry.captureException(error, {
+          extra: {
+            cause: error instanceof Error ? error.cause : undefined,
+          },
+        });
+      }
+
+      setUserRole(null);
+      removeUserRoleCookie();
+
+      return null;
+    } finally {
+      setGetUserRoleLoading(false);
+    }
+  };
+
   const updateUserProfile = async ({
     username,
     bio,
@@ -1017,6 +1162,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     interests,
     isOnboarded,
     avatarUrl,
+    cookies,
   }: {
     username?: string;
     bio?: string;
@@ -1026,6 +1172,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     interests?: string[];
     isOnboarded?: boolean;
     avatarUrl?: string;
+    cookies?: string[];
   }) => {
     try {
       setUpdateUserProfileLoading(true);
@@ -1051,6 +1198,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         interests?: string[];
         is_onboarded?: boolean;
         avatar_url?: string;
+        cookies?: string[];
       } = {};
       if (username) {
         updateParams.username = username;
@@ -1076,6 +1224,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (avatarUrl) {
         updateParams.avatar_url = avatarUrl;
       }
+      if (cookies) {
+        updateParams.cookies = cookies;
+      }
 
       const updateUserProfile = await supabase
         .from("user_profiles")
@@ -1099,6 +1250,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         aiExperience: updateUserProfile.data.ai_experience || null,
         usageGoals: updateUserProfile.data.usage_goals || null,
         interests: updateUserProfile.data.interests || null,
+        cookies: updateUserProfile.data.cookies || null,
       });
 
       toast({
@@ -1244,11 +1396,14 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setAuthUser(null);
       setUserProfile(null);
+      setUserRole(null);
       setUserTopup(null);
       setUserSubscription(null);
       setGenerations([]);
+      setBlogs([]);
       setApiKeys([]);
       removeUserSubscriptionCookie();
+      removeUserRoleCookie();
 
       Cookies.remove(ACCESS_TOKEN_COOKIE_KEY);
 
@@ -1263,6 +1418,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
 
       return true;
     } catch (error: unknown) {
+      console.log("logout error", error);
       Sentry.captureException(error, {
         extra: {
           cause: error instanceof Error ? error.cause : undefined,
@@ -1374,6 +1530,366 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       return false;
     } finally {
       setGetUserGenerationsLoading(false);
+    }
+  };
+
+  const getBlogs = async () => {
+    try {
+      setGetBlogsLoading(true);
+
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID is required", {
+          cause: { authUser },
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      const getBlogsResponse = await supabase
+        .from("blogs")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!getBlogsResponse.data) {
+        throw new Error("Failed to get blogs", {
+          cause: { getBlogsResponse },
+        });
+      }
+
+      setBlogs(getBlogsResponse.data);
+
+      return true;
+    } catch (error: any) {
+      if (isDashboardPath) {
+        Sentry.captureException(error, {
+          extra: { cause: JSON.stringify(error?.cause) },
+        });
+      }
+
+      setBlogs([]);
+
+      return false;
+    } finally {
+      setGetBlogsLoading(false);
+    }
+  };
+
+  const getBlog = async (id: string): Promise<Blog | null> => {
+    try {
+      setGetBlogLoading(true);
+
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      if (!id) {
+        throw new Error("Blog ID is required", {
+          cause: { id },
+        });
+      }
+
+      const getBlogResponse = await supabase
+        .from("blogs")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      console.log("getBlogResponse", getBlogResponse);
+
+      if (!getBlogResponse.data) {
+        throw new Error("Blog not found", {
+          cause: { getBlogResponse },
+        });
+      }
+
+      return getBlogResponse.data;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: { cause: JSON.stringify(error?.cause) },
+      });
+
+      return null;
+    } finally {
+      setGetBlogLoading(false);
+    }
+  };
+
+  const createBlog = async ({
+    title,
+    content,
+    slug,
+    featuredImageUrl,
+    archived,
+  }: {
+    title: string;
+    content: string;
+    slug: string;
+    featuredImageUrl?: string;
+    archived?: boolean;
+  }) => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      setCreateBlogLoading(true);
+
+      const insertBlog = await supabase
+        .from("blogs")
+        .insert({
+          title,
+          content,
+          slug,
+          featured_image_url: featuredImageUrl || null,
+          archived: archived || false,
+          updated_at: new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (!insertBlog.data || insertBlog.error) {
+        throw new Error("Failed to create blog", {
+          cause: insertBlog,
+        });
+      }
+
+      toast({
+        title: "Successfully created blog",
+        duration: 5000,
+      });
+
+      // Refresh the blogs list
+      await getBlogs();
+
+      return true;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: {
+          cause: error?.cause,
+        },
+      });
+
+      toast({
+        title: "Something went wrong while creating the blog",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setCreateBlogLoading(false);
+    }
+  };
+
+  const updateBlog = async (
+    id: string,
+    {
+      title,
+      content,
+      slug,
+      featuredImageUrl,
+      archived,
+    }: {
+      title?: string;
+      content?: string;
+      slug?: string;
+      featuredImageUrl?: string;
+      archived?: boolean;
+    }
+  ) => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      if (!id) {
+        throw new Error("Blog ID is required", {
+          cause: { id },
+        });
+      }
+
+      setUpdateBlogLoading(true);
+
+      const updateParams: {
+        title?: string;
+        content?: string;
+        slug?: string;
+        featured_image_url?: string;
+        archived?: boolean;
+        updated_at: string;
+      } = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (title) {
+        updateParams.title = title;
+      }
+      if (content) {
+        updateParams.content = content;
+      }
+      if (slug) {
+        updateParams.slug = slug;
+      }
+      if (featuredImageUrl !== undefined) {
+        updateParams.featured_image_url = featuredImageUrl;
+      }
+      if (typeof archived === "boolean") {
+        updateParams.archived = archived;
+      }
+
+      const updateBlog = await supabase
+        .from("blogs")
+        .update(updateParams)
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (!updateBlog.data || updateBlog.error) {
+        throw new Error("Failed to update blog", {
+          cause: updateBlog,
+        });
+      }
+
+      toast({
+        title: "Successfully updated blog",
+        duration: 5000,
+      });
+
+      // Refresh the blogs list
+      await getBlogs();
+
+      return true;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: {
+          cause: error?.cause,
+        },
+      });
+
+      toast({
+        title: "Something went wrong while updating the blog",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setUpdateBlogLoading(false);
+    }
+  };
+
+  const deleteBlog = async (id: string) => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      setDeleteBlogLoading(true);
+
+      const deleteBlog = await supabase
+        .from("blogs")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (deleteBlog.error) {
+        throw new Error("Failed to delete blog", {
+          cause: deleteBlog,
+        });
+      }
+
+      toast({
+        title: "Successfully deleted blog",
+        duration: 5000,
+      });
+
+      // Refresh the blogs list
+      await getBlogs();
+
+      return true;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: {
+          cause: error?.cause,
+        },
+      });
+
+      toast({
+        title: "Something went wrong while deleting the blog",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setDeleteBlogLoading(false);
     }
   };
 
@@ -1605,7 +2121,10 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const uploadImage = async (file: File, imageType: "reference" | "avatar") => {
+  const uploadImage = async (
+    file: File,
+    imageType: "reference" | "avatar" | "blog"
+  ) => {
     try {
       if (!session?.accessToken) {
         throw new Error("Session not found", {
@@ -1773,44 +2292,6 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const refreshSession = async () => {
-    try {
-      setGetSessionLoading(true);
-
-      const getSession = await supabase.auth.refreshSession();
-      if (!getSession.data.session) {
-        throw new Error("No session found", {
-          cause: getSession,
-        });
-      }
-
-      setSession({
-        accessToken: getSession.data.session.access_token,
-      });
-
-      Cookies.set(
-        ACCESS_TOKEN_COOKIE_KEY,
-        getSession.data.session.access_token
-      );
-
-      return true;
-    } catch (error: unknown) {
-      if (isDashboardPath) {
-        Sentry.captureException(error, {
-          extra: {
-            cause: error instanceof Error ? error.cause : undefined,
-          },
-        });
-      }
-
-      setSession(null);
-
-      return false;
-    } finally {
-      setRefreshSessionLoading(false);
-    }
-  };
-
   const loadSession = async () => {
     if (!session?.accessToken) {
       getSession();
@@ -1824,18 +2305,8 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       getUserSubscription();
       getUserGenerations();
       getApiKeys();
+      getUserRole();
     }
-  };
-
-  const reloadSession = async () => {
-    await refreshSession();
-    await getSession();
-    await getAuthUser();
-    await getUserProfile();
-    await getUserTopup();
-    await getUserSubscription();
-    await getUserGenerations();
-    await getApiKeys();
   };
 
   const joinWaitlist = async ({
@@ -1909,13 +2380,21 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [userSubscription, isSubscriptionExpired]);
 
+  useEffect(() => {
+    if (userRole?.role_type === USER_ROLES.ADMIN) {
+      getBlogs();
+    }
+  }, [userRole]);
+
   const value = {
     session,
     authUser,
     userProfile,
+    userRole,
     userTopup,
     userSubscription,
     generations,
+    blogs,
     apiKeys,
     changePasswordEmail,
     setChangePasswordEmail,
@@ -1939,6 +2418,8 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     getAuthUserLoading,
     getUserProfile,
     getUserProfileLoading,
+    getUserRole,
+    getUserRoleLoading,
     getUserTopup,
     getUserTopupLoading,
     getUserSubscription,
@@ -1949,6 +2430,16 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     deleteUserLoading,
     getUserGenerations,
     getUserGenerationsLoading,
+    getBlogs,
+    getBlogsLoading,
+    getBlog,
+    getBlogLoading,
+    createBlog,
+    createBlogLoading,
+    updateBlog,
+    updateBlogLoading,
+    deleteBlog,
+    deleteBlogLoading,
     getApiKeys,
     getApiKeysLoading,
     updateUserProfile,

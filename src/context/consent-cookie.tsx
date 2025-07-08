@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import Cookies from "js-cookie";
 import { CONSENT_COOKIE_KEY } from "@/constants/cookies";
+import { useSupabase } from "@/context/supabase";
 
 const ConsentCookieContext = React.createContext<{
   isVisible: boolean;
@@ -16,40 +17,54 @@ const ConsentCookieContext = React.createContext<{
 
 const ConsentCookieComponent = () => {
   const { isVisible, setIsVisible } = React.useContext(ConsentCookieContext);
+  const { userProfile, updateUserProfile } = useSupabase();
 
   const [showChoose, setShowChoose] = React.useState(false);
   const [functionalCookie, setFunctionalCookie] = React.useState(false);
   const [analyticsCookie, setAnalyticsCookie] = React.useState(false);
   const [advertisingCookie, setAdvertisingCookie] = React.useState(false);
 
-  const handleAcceptAll = () => {
-    Cookies.set(
-      CONSENT_COOKIE_KEY,
-      ["essential", "analytics", "functional", "advertising"].join(","),
-      { expires: 365 }
-    );
+  const handleAcceptAll = async () => {
+    const consentArray = [
+      "essential",
+      "analytics",
+      "functional",
+      "advertising",
+    ];
+    Cookies.set(CONSENT_COOKIE_KEY, consentArray.join(","), { expires: 365 });
     setFunctionalCookie(true);
     setAnalyticsCookie(true);
     setAdvertisingCookie(true);
     setShowChoose(false);
     setIsVisible(false);
+
+    // Update Supabase if user is logged in
+    if (userProfile) {
+      await updateUserProfile({ cookies: consentArray });
+    }
   };
 
-  const handleEssentialOnly = () => {
+  const handleEssentialOnly = async () => {
+    const consentArray = ["essential"];
     Cookies.remove(CONSENT_COOKIE_KEY);
-    Cookies.set(CONSENT_COOKIE_KEY, ["essential"].join(","), { expires: 365 });
+    Cookies.set(CONSENT_COOKIE_KEY, consentArray.join(","), { expires: 365 });
     setFunctionalCookie(false);
     setAnalyticsCookie(false);
     setAdvertisingCookie(false);
     setShowChoose(false);
     setIsVisible(false);
+
+    // Update Supabase if user is logged in
+    if (userProfile) {
+      await updateUserProfile({ cookies: consentArray });
+    }
   };
 
   const handleChoose = () => {
     setShowChoose(!showChoose);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const consentCookie = ["essential"];
 
     if (functionalCookie) {
@@ -67,18 +82,51 @@ const ConsentCookieComponent = () => {
     setShowChoose(false);
 
     setIsVisible(false);
+
+    // Update Supabase if user is logged in
+    if (userProfile) {
+      await updateUserProfile({ cookies: consentCookie });
+    }
   };
 
   useEffect(() => {
-    const consentCookie = Cookies.get(CONSENT_COOKIE_KEY);
-    if (consentCookie) {
-      const consentCookieValue = consentCookie.split(",");
-      setFunctionalCookie(consentCookieValue.includes("functional"));
-      setAnalyticsCookie(consentCookieValue.includes("analytics"));
-      setAdvertisingCookie(consentCookieValue.includes("advertising"));
+    // First check if user has cookies in their profile
+    if (userProfile?.cookies && userProfile.cookies.length > 0) {
+      // Sync from Supabase
+      const supabaseCookies = userProfile.cookies;
+
+      setFunctionalCookie(supabaseCookies.includes("functional"));
+      setAnalyticsCookie(supabaseCookies.includes("analytics"));
+      setAdvertisingCookie(supabaseCookies.includes("advertising"));
+
+      // Also update local cookies
+      Cookies.set(CONSENT_COOKIE_KEY, supabaseCookies.join(","), {
+        expires: 365,
+      });
+
+      setIsVisible(false);
+    } else {
+      // Fall back to local cookies if no Supabase cookies
+      const consentCookie = Cookies.get(CONSENT_COOKIE_KEY);
+
+      if (consentCookie) {
+        const consentCookieValue = consentCookie.split(",");
+
+        setFunctionalCookie(consentCookieValue.includes("functional"));
+        setAnalyticsCookie(consentCookieValue.includes("analytics"));
+        setAdvertisingCookie(consentCookieValue.includes("advertising"));
+
+        // If user is logged in but has no cookies in profile, sync local to Supabase
+        if (userProfile && !userProfile.cookies) {
+          updateUserProfile({ cookies: consentCookieValue });
+        }
+      }
+
+      const shouldShowBanner = !consentCookie && !userProfile?.cookies;
+
+      setIsVisible(shouldShowBanner);
     }
-    setIsVisible(!consentCookie);
-  }, [setIsVisible]);
+  }, [userProfile]);
 
   if (!isVisible) return null;
 

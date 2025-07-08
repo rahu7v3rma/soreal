@@ -28,16 +28,27 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           name="viewport"
           content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover"
         />
-        <link rel="icon" href="https://api.soreal.app/assets/png/logo/favicon.png" />
-        <link rel="shortcut icon" href="https://api.soreal.app/assets/png/logo/favicon.png" />
-        <link rel="apple-touch-icon" href="https://api.soreal.app/assets/png/logo/favicon.png" />
+        <link
+          rel="icon"
+          href="https://api.soreal.app/assets/png/logo/favicon.png"
+        />
+        <link
+          rel="shortcut icon"
+          href="https://api.soreal.app/assets/png/logo/favicon.png"
+        />
+        <link
+          rel="apple-touch-icon"
+          href="https://api.soreal.app/assets/png/logo/favicon.png"
+        />
       </head>
       <body>
         <NextThemesProvider disableTransitionOnChange>
-          <CookieConsentProvider>
-            <SupabaseProvider>{children}</SupabaseProvider>
-            <Toaster />
-          </CookieConsentProvider>
+          <SupabaseProvider>
+            <CookieConsentProvider>
+              {children}
+              <Toaster />
+            </CookieConsentProvider>
+          </SupabaseProvider>
         </NextThemesProvider>
       </body>
     </html>

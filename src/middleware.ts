@@ -8,14 +8,24 @@ import {
   apiSorealPaths,
   apiSorealExternalPaths,
   paths,
+  adminPaths,
 } from "@/constants/paths";
 import { ACCESS_TOKEN_COOKIE_KEY } from "@/constants/cookies";
 import { planNames } from "./constants/subscription";
-import { getUserSubscriptionCookie } from "./lib/cookies/server";
+import { getUserSubscriptionCookie, getUserRoleCookie } from "./lib/cookies/server";
+import { USER_ROLES } from "./constants/user-role";
 
 export async function middleware(request: NextRequest) {
   if (sentryPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.next();
+  }
+
+  // Check for admin paths first
+  if (adminPaths.includes(request.nextUrl.pathname)) {
+    const userRole = await getUserRoleCookie();
+    if (userRole?.role_type === USER_ROLES.ADMIN) {
+      return NextResponse.next();
+    }
   }
 
   if (request.nextUrl.host === "api.soreal.app") {
