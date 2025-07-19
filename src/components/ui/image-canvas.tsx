@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -72,7 +71,7 @@ export function ImageCanvas({
             className="relative w-full h-full group cursor-pointer"
             onClick={onImageClick}
           >
-            <Image
+            <img
               src={generatedImage}
               alt="Generated image"
               width={800}

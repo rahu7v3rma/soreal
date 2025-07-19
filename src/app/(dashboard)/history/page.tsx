@@ -32,7 +32,6 @@ import {
   Share,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -308,11 +307,10 @@ const Page = () => {
                         {image.public_url &&
                         typeof image.public_url === "string" &&
                         image.public_url.startsWith("http") ? (
-                          <Image
+                          <img
                             src={image.public_url}
                             alt={image.prompt || "Generated image"}
-                            fill
-                            className="object-cover"
+                            className="object-cover w-full h-full"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-muted">

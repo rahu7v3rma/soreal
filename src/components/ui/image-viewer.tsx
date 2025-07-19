@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Download, Share, X } from "lucide-react";
-import Image from "next/image";
 import React from "react";
 
 export function ImageViewer({
@@ -42,7 +41,7 @@ export function ImageViewer({
           <div className="flex flex-col md:flex-row h-full w-full">
             <div className="flex items-center bg-black/20 w-full">
               <div className="w-[70%] h-full relative">
-                <Image
+                <img
                   src={
                     imageUrl &&
                     typeof imageUrl === "string" &&
@@ -51,8 +50,7 @@ export function ImageViewer({
                       : "/image-placeholder.png"
                   }
                   alt={alt || "Image"}
-                  fill
-                  className="object-contain z-10"
+                  className="object-contain z-10 w-full h-full"
                 />
               </div>
               <div className="p-6 space-y-6 text-black w-[30%] flex flex-col justify-start items-start h-full bg-white">

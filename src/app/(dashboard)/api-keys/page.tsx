@@ -46,6 +46,7 @@ const Page = () => {
     useState(false);
   const [newApiKeyPermissionGetImage, setNewApiKeyPermissionGetImage] =
     useState(false);
+  const [revokingKeys, setRevokingKeys] = useState<Record<string, boolean>>({});
 
   const handleCopyApiKey = (key: string) => {
     navigator.clipboard
@@ -82,10 +83,16 @@ const Page = () => {
   };
 
   const revokeApiKey = async (apiKeyId: string) => {
+    setRevokingKeys(prev => ({ ...prev, [apiKeyId]: true }));
+    
     updateApiKey(apiKeyId, { revoked: true }).then((response) => {
       if (response) {
         getApiKeys();
       }
+    }).catch(() => {
+      // Error handling if needed
+    }).finally(() => {
+      setRevokingKeys(prev => ({ ...prev, [apiKeyId]: false }));
     });
   };
 
@@ -301,9 +308,9 @@ const Page = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => revokeApiKey(apiKey.id)}
-                                  disabled={updateApiKeyLoading}
+                                  disabled={revokingKeys[apiKey.id]}
                                 >
-                                  {updateApiKeyLoading ? (
+                                  {revokingKeys[apiKey.id] ? (
                                     <>
                                       <Loader className="h-4 w-4 mr-1 animate-spin" />
                                       Revoking...

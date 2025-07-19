@@ -1,6 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -55,7 +56,23 @@ export default function AdminDashboardLayout({
                 collapsed ? "justify-center" : "justify-start"
               )}
             >
-              <SorealLogo className={collapsed ? "h-8 w-8" : "h-10"} />
+              <div className="flex items-center relative">
+                <img
+                  src="https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
+                  alt="Soreal"
+                  width={collapsed ? 32 : 120}
+                  height={collapsed ? 8 : 32}
+                  style={{ height: "auto" }}
+                />
+                {!collapsed && (
+                  <Badge
+                    variant="outline"
+                    className=" bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100 -ml-2 text-[10px] px-2 py-0.5"
+                  >
+                    Admin
+                  </Badge>
+                )}
+              </div>
             </Link>
             <Button
               variant="ghost"
@@ -111,7 +128,7 @@ export default function AdminDashboardLayout({
                   collapsed ? "px-2" : "px-3"
                 )}
                 size={collapsed ? "icon" : "default"}
-                onClick={logout}
+                onClick={() => logout({ redirectTo: "/admin/login" })}
                 id="sidebar-logout-button"
               >
                 <LogOut className="h-5 w-5" />
@@ -161,7 +178,7 @@ export default function AdminDashboardLayout({
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => logout({ redirectTo: "/admin/login" })}>Logout</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

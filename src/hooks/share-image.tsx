@@ -21,7 +21,7 @@ export const useShareImage = () => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 

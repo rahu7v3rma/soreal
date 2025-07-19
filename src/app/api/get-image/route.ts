@@ -39,7 +39,7 @@ async function getHandler(request: ImageGenerationRequest) {
     });
   } catch (error: any) {
     Sentry.captureException(error, {
-      extra: { cause: error?.cause },
+      extra: { cause: JSON.stringify(error?.cause) },
     });
 
     return NextResponse.json(

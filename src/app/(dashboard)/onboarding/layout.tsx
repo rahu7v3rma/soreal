@@ -23,7 +23,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={logout}
+            onClick={() => logout()}
             className="flex items-center gap-1 text-muted-foreground hover:text-foreground h-8 text-xs"
             aria-label="Logout"
           >

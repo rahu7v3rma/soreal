@@ -1,5 +1,6 @@
 import {
   FileText,
+  Key,
   LayoutDashboard,
 } from "lucide-react";
 
@@ -18,8 +19,13 @@ export const adminNavItems: NavItem[] = [
     icon: <LayoutDashboard className="h-5 w-5" />,
   },
   {
-    title: "Blogs",
-    href: "/admin/dashboard/blogs",
+    title: "Blog",
+    href: "/admin/dashboard/blog",
     icon: <FileText className="h-5 w-5" />,
+  },
+  {
+    title: "API Keys",
+    href: "/admin/dashboard/api-keys",
+    icon: <Key className="h-5 w-5" />,
   },
 ]; 

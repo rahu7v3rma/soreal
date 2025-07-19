@@ -15,7 +15,7 @@ export const accessTokenMiddleware = async (request: MiddlewareRequest) => {
       throw new Error("unauthorized", { cause: { authorization } });
     }
 
-    const getUser = await supabaseAdmin.auth.admin.getUserById(authorization);
+    const getUser = await supabaseAdmin.auth.getUser(authorization);
     if (!getUser.data.user) {
       throw new Error("unauthorized", { cause: { getUser } });
     }
@@ -63,7 +63,7 @@ export const accessTokenMiddleware = async (request: MiddlewareRequest) => {
 
     Sentry.captureException(error, {
       extra: {
-        cause: error?.cause,
+        cause: JSON.stringify(error?.cause),
       },
     });
 
@@ -73,3 +73,66 @@ export const accessTokenMiddleware = async (request: MiddlewareRequest) => {
     );
   }
 };
+
+export const adminAccessMiddleware =
+  (permissions: string[]) => async (request: MiddlewareRequest) => {
+    try {
+      const authorization = request.headers.get("authorization");
+      if (!authorization || !authorization.startsWith("Bearer ")) {
+        throw new Error("unauthorized", { cause: { authorization } });
+      }
+
+      const apiKey = authorization.split(" ")[1];
+      if (!apiKey) {
+        throw new Error("unauthorized", { cause: { authorization } });
+      }
+
+      const { data: apiKeyData, error: apiKeyError } = await supabaseAdmin
+        .from("admin_api_keys")
+        .select("permissions")
+        .eq("api_key_token", apiKey)
+        .single();
+
+      if (apiKeyError || !apiKeyData) {
+        throw new Error("unauthorized", { cause: { apiKeyError } });
+      }
+
+      const existingPermissions = apiKeyData.permissions as string[];
+      const hasAllPermissions = permissions.every((p) =>
+        existingPermissions.includes(p)
+      );
+
+      if (!hasAllPermissions) {
+        throw new Error("forbidden", {
+          cause: { required: permissions, existing: existingPermissions },
+        });
+      }
+    } catch (error: any) {
+      const valid401Messages = ["unauthorized"];
+      if (valid401Messages.includes(error?.message)) {
+        return NextResponse.json(
+          { success: false, message: error?.message, data: null },
+          { status: 401 }
+        );
+      }
+
+      const valid403Messages = ["forbidden"];
+      if (valid403Messages.includes(error?.message)) {
+        return NextResponse.json(
+          { success: false, message: error?.message, data: null },
+          { status: 403 }
+        );
+      }
+
+      Sentry.captureException(error, {
+        extra: {
+          cause: JSON.stringify(error?.cause),
+        },
+      });
+
+      return NextResponse.json(
+        { success: false, message: "Internal Server Error", data: null },
+        { status: 500 }
+      );
+    }
+  };

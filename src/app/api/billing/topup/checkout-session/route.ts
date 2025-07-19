@@ -42,7 +42,7 @@ async function postHandler(request: MiddlewareRequest) {
       message: "Checkout session created successfully",
       data: responseData,
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
     Sentry.captureException(error);
 
     return NextResponse.json(

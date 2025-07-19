@@ -11,7 +11,6 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useSupabase } from "@/context/supabase";
 import { Image as ImageIcon, Zap } from "lucide-react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
@@ -73,11 +72,10 @@ const Page = () => {
                         key={index}
                         className="aspect-square rounded-md overflow-hidden relative"
                       >
-                        <Image
+                        <img
                           src={image.public_url || ""}
                           alt={image.prompt || "Generated image"}
-                          fill
-                          className="object-cover"
+                          className="object-cover w-full h-full"
                         />
                       </div>
                     ))}

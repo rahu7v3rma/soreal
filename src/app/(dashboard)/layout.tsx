@@ -252,7 +252,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                   collapsed ? "px-2" : "px-3"
                 )}
                 size={collapsed ? "icon" : "default"}
-                onClick={logout}
+                onClick={() => logout()}
                 id="sidebar-logout-button"
               >
                 <LogOut className="h-5 w-5" />
@@ -309,7 +309,7 @@ function Layout({ children }: { children: React.ReactNode }) {
                       <Link href="/settings">Settings</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

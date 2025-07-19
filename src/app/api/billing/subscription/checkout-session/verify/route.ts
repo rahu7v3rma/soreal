@@ -7,6 +7,7 @@ import {
 } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { subscriptionCheckoutSessionVerifyRequestQuerySchema } from "@/lib/zod-schema/billing";
+import { sendPaymentInvoice } from "@/lib/resend";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -128,6 +129,39 @@ async function postHandler(request: MiddlewareRequest) {
       });
     }
 
+    // Retrieve invoice from Stripe and send invoice email
+    if (session.invoiceId && user.email) {
+      try {
+        const invoice = await stripe.invoices.retrieve(session.invoiceId as string);
+        
+        if (invoice.hosted_invoice_url) {
+          const sendInvoiceEmailResponse = await sendPaymentInvoice(
+            user.email,
+            invoice.hosted_invoice_url
+          );
+          
+          if (sendInvoiceEmailResponse.error) {
+            // Log error but don't fail the entire process
+            Sentry.captureException(sendInvoiceEmailResponse.error, {
+              extra: {
+                userEmail: user.email,
+                invoiceId: session.invoiceId,
+                hostedInvoiceUrl: invoice.hosted_invoice_url,
+              },
+            });
+          }
+        }
+      } catch (invoiceError) {
+        // Log error but don't fail the entire process
+        Sentry.captureException(invoiceError, {
+          extra: {
+            userEmail: user.email,
+            invoiceId: session.invoiceId,
+          },
+        });
+      }
+    }
+
     return NextResponse.redirect(
       new URL("/billing?subscription_payment_success=1", request.url),
       { status: 302 }
@@ -135,7 +169,7 @@ async function postHandler(request: MiddlewareRequest) {
   } catch (error: any) {
     Sentry.captureException(error, {
       extra: {
-        cause: error?.cause,
+        cause: JSON.stringify(error?.cause),
       },
     });
 

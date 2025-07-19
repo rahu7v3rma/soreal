@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 import { Check, Copy } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { CopyBlock, atomOneDark } from "react-code-blocks";
 import { codeSnippets } from "@/constants/api-docs/quick-start";
@@ -67,8 +66,8 @@ const Page = () => {
                 </p>
 
                 <div className="my-6 flex flex-col items-center">
-                  <Image
-                    src={`https://api.soreal.app/assets/png/api-docs/api-keys-dashboard.png`}
+                  <img
+                    src="https://api.soreal.app/assets/png/api-docs/api-keys-dashboard.png"
                     alt="API Key Documentation"
                     width={800}
                     height={400}

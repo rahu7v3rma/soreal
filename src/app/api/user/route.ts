@@ -62,6 +62,16 @@ async function deleteHandler(request: MiddlewareRequest) {
       });
     }
 
+    const deleteUserRoleResponse = await supabaseAdmin
+      .from("user_role")
+      .delete()
+      .eq("user_id", user.id);
+    if (deleteUserRoleResponse.error) {
+      throw new Error("failed to delete user role", {
+        cause: { deleteUserRoleResponse },
+      });
+    }
+
     const deleteUserGenerationsResponse = await supabaseAdmin
       .from("user_generations")
       .delete()
@@ -157,7 +167,7 @@ async function deleteHandler(request: MiddlewareRequest) {
     );
   } catch (error: unknown) {
     Sentry.captureException(error, {
-      extra: { cause: error instanceof Error ? error.cause : undefined },
+      extra: { cause: error instanceof Error ? JSON.stringify(error.cause) : undefined },
     });
 
     return NextResponse.json(

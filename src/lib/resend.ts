@@ -51,3 +51,51 @@ export async function sendImageGenerationEmail(to: string, imageUrl: string) {
     return { error };
   }
 }
+
+export async function sendPaymentReceipt(to: string, receiptUrl: string) {
+  try {
+    const templateUrl =
+      "https://api.soreal.app/assets/html/email-templates/payment-receipt.html";
+
+    const response = await axios.get(templateUrl);
+    if (!response.data) {
+      throw new Error("Failed to fetch email template", {
+        cause: response.data,
+      });
+    }
+
+    const htmlTemplate = response.data.replaceAll("{{ .ReceiptURL }}", receiptUrl);
+
+    return sendEmail({
+      to,
+      subject: "Your Soreal Payment Receipt",
+      html: htmlTemplate,
+    });
+  } catch (error) {
+    return { error };
+  }
+}
+
+export async function sendPaymentInvoice(to: string, invoiceUrl: string) {
+  try {
+    const templateUrl =
+      "https://api.soreal.app/assets/html/email-templates/payment-invoice.html";
+
+    const response = await axios.get(templateUrl);
+    if (!response.data) {
+      throw new Error("Failed to fetch email template", {
+        cause: response.data,
+      });
+    }
+
+    const htmlTemplate = response.data.replaceAll("{{ .InvoiceURL }}", invoiceUrl);
+
+    return sendEmail({
+      to,
+      subject: "Your Soreal Payment Invoice",
+      html: htmlTemplate,
+    });
+  } catch (error) {
+    return { error };
+  }
+}

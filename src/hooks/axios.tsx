@@ -32,7 +32,7 @@ export const useAxios = () => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 

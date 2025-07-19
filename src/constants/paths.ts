@@ -1,5 +1,9 @@
 export const sentryPaths = ["/monitoring"];
 
+export const allPathPrefixes = ["/blog", "/api/admin/blog/"];
+
+export const allPaths = ["/blog", "/api/admin/blog"];
+
 export const publicPaths = [
   "/",
   "/login",
@@ -69,9 +73,14 @@ export const userPaths = [
 
 export const adminPaths = [
   "/admin/dashboard",
-  "/admin/dashboard/blogs",
-  "/admin/dashboard/blogs/create",
-  "/admin/dashboard/blogs/edit",
+  "/admin/dashboard/blog",
+  "/admin/dashboard/blog/create",
+  "/admin/dashboard/api-keys",
+];
+
+export const adminPathPrefixes = [
+  "/admin/dashboard/blog/edit/",
+  "/admin/dashboard/blog/preview/",
 ];
 
 export const dashboardPaths = [

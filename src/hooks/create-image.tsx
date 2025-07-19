@@ -67,7 +67,7 @@ export const useHandleSubmit = ({
   creditRequirement: number;
 }) => {
   const {
-    authUser,
+    session,
     userTopup,
     getUserTopup,
     getUserGenerations,
@@ -82,10 +82,10 @@ export const useHandleSubmit = ({
     try {
       e.preventDefault();
 
-      if (!authUser?.id) {
-        throw new Error("User not authenticated", {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
           cause: {
-            authUser,
+            session,
             userTopup,
           },
         });
@@ -127,7 +127,7 @@ export const useHandleSubmit = ({
       setGeneratedImage(null);
 
       const response = await axios.post(requestUrl, requestBody, {
-        headers: { authorization: authUser.id },
+        headers: { authorization: session.accessToken },
       });
 
       const imageUrl = response?.data?.data?.imageUrl;
@@ -160,7 +160,7 @@ export const useHandleSubmit = ({
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 

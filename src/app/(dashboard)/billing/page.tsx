@@ -41,7 +41,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -635,7 +634,7 @@ const Page = () => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-start gap-3">
                       <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
-                        <Image
+                        <img
                           src={`https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png`}
                           alt="Soreal"
                           className="w-6 h-6"

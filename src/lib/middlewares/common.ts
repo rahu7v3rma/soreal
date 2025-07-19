@@ -10,13 +10,14 @@ export interface MiddlewareRequest extends NextRequest {
 
 export const withMiddlewares = (
   ...middlewares: ((
-    request: MiddlewareRequest
+    request: MiddlewareRequest,
+    params?: any
   ) => Promise<NextResponse<any> | undefined>)[]
 ) => {
-  return async (request: NextRequest) => {
+  return async (request: NextRequest, params?: any) => {
     const extendedRequest = request as MiddlewareRequest;
     for (const middleware of middlewares) {
-      const response = await middleware(extendedRequest);
+      const response = await middleware(extendedRequest, params);
       if (response) return response;
     }
     return NextResponse.json(

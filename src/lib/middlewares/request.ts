@@ -21,7 +21,7 @@ export const validateRequestBodyMiddleware = (zodSchema: ZodSchema) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -64,7 +64,7 @@ export const validateRequestQueryMiddleware = (zodSchema: ZodSchema) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 

@@ -15,7 +15,7 @@ import {
 import { modes } from "@/constants/ui/model-grid";
 import { shuffle } from "@/lib/utils/common";
 import { AnimatePresence, motion } from "framer-motion";
-import Image from "next/image";
+
 import { useEffect, useRef, useState } from "react";
 import "./page.css";
 import Link from "next/link";
@@ -116,15 +116,10 @@ const Page = () => {
             <div className="absolute inset-0 bg-black/25 z-10 pointer-events-none" />
 
             <div className="absolute inset-0 z-0">
-              <Image
+              <img
                 src={images[currentIndex]}
                 alt="Hero background"
-                fill
-                className="object-cover"
-                priority
-                placeholder="blur"
-                blurDataURL={BLUR_DATA_URL}
-                sizes="100vw"
+                className="object-cover w-full h-full"
               />
             </div>
 
@@ -140,14 +135,10 @@ const Page = () => {
                     ease: "easeInOut",
                   }}
                 >
-                  <Image
+                  <img
                     src={images[nextIndex]}
                     alt="Hero background"
-                    fill
-                    className="object-cover"
-                    placeholder="blur"
-                    blurDataURL={BLUR_DATA_URL}
-                    sizes="100vw"
+                    className="object-cover w-full h-full"
                   />
                 </motion.div>
               )}
@@ -239,7 +230,7 @@ const Page = () => {
                         ease: "easeOut"
                       }}
                     >
-                      <Image
+                      <img
                         src={src}
                         alt="User"
                         className="w-7 h-7 rounded-full border-2 border-white"

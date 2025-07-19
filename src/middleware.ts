@@ -9,6 +9,9 @@ import {
   apiSorealExternalPaths,
   paths,
   adminPaths,
+  adminPathPrefixes,
+  allPathPrefixes,
+  allPaths,
 } from "@/constants/paths";
 import { ACCESS_TOKEN_COOKIE_KEY } from "@/constants/cookies";
 import { planNames } from "./constants/subscription";
@@ -20,8 +23,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for admin paths first
-  if (adminPaths.includes(request.nextUrl.pathname)) {
+  // Check for paths with prefixes that should be allowed
+  if (allPathPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix))) {
+    return NextResponse.next();
+  }
+
+  // Check for specific paths that should be allowed
+  if (allPaths.includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
+
+  // Check for admin paths first (exact matches and prefix matches for dynamic routes)
+  if (adminPaths.includes(request.nextUrl.pathname) || adminPathPrefixes.some(prefix => request.nextUrl.pathname.startsWith(prefix))) {
     const userRole = await getUserRoleCookie();
     if (userRole?.role_type === USER_ROLES.ADMIN) {
       return NextResponse.next();

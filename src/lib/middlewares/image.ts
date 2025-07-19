@@ -197,8 +197,7 @@ export const authMiddleware = (
       };
 
       if (authType === "accessToken") {
-        const getUser =
-          await supabaseAdmin.auth.admin.getUserById(authorization);
+        const getUser = await supabaseAdmin.auth.getUser(authorization);
         if (!getUser.data.user) {
           throw new Error("unauthorized", { cause: { getUser } });
         }
@@ -274,7 +273,7 @@ export const authMiddleware = (
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -322,7 +321,7 @@ export const validateRequestBodyMiddleware = (zodSchema: ZodSchema) => {
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -375,7 +374,7 @@ export const validateRequestBodyImageUrlMiddleware = (
       logger.error("Failed to validate request body image url", error);
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -437,7 +436,7 @@ export const creditRequirementMiddleware = (creditRequirement: number) => {
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -697,7 +696,7 @@ export const generateReplicateImageMiddleware = (
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -795,7 +794,7 @@ export const saveImageMiddleware = (
       logger.error("Failed to save image", error);
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -830,7 +829,7 @@ export const sendEmailMiddleware = async (request: ImageGenerationRequest) => {
 
     Sentry.captureException(error, {
       extra: {
-        cause: error?.cause,
+        cause: JSON.stringify(error?.cause),
       },
     });
 
@@ -913,7 +912,7 @@ export const deductCreditsMiddleware = (creditRequirement: number) => {
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -960,7 +959,7 @@ export const responseMiddleware = (
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 

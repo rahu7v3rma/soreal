@@ -5,7 +5,7 @@ import axios from "axios";
 import { useState } from "react";
 
 export const useApi = () => {
-  const { session, getUserSubscription, authUser } = useSupabase();
+  const { session, getUserSubscription } = useSupabase();
   const { toast } = useToast();
 
   const [isEnhancingPrompt, setIsEnhancingPrompt] = useState(false);
@@ -28,10 +28,10 @@ export const useApi = () => {
 
   const handleEnhancePrompt = async (prompt: string) => {
     try {
-      if (!authUser?.id) {
-        throw new Error("user not found", {
+      if (!session?.accessToken) {
+        throw new Error("session not found", {
           cause: {
-            user: authUser,
+            session,
           },
         });
       }
@@ -51,7 +51,7 @@ export const useApi = () => {
         },
         {
           headers: {
-            authorization: authUser.id,
+            authorization: session.accessToken,
           },
         }
       );
@@ -93,7 +93,7 @@ export const useApi = () => {
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -117,10 +117,10 @@ export const useApi = () => {
     quantity: number;
   }) => {
     try {
-      if (!authUser?.id) {
-        throw new Error("user not found", {
+      if (!session?.accessToken) {
+        throw new Error("session not found", {
           cause: {
-            user: authUser,
+            session,
           },
         });
       }
@@ -135,7 +135,7 @@ export const useApi = () => {
         },
         {
           headers: {
-            authorization: authUser.id,
+            authorization: session.accessToken,
           },
         }
       );
@@ -150,7 +150,7 @@ export const useApi = () => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -183,10 +183,10 @@ export const useApi = () => {
     };
   }) => {
     try {
-      if (!authUser?.id) {
-        throw new Error("user not found", {
+      if (!session?.accessToken) {
+        throw new Error("session not found", {
           cause: {
-            user: authUser,
+            session,
           },
         });
       }
@@ -225,7 +225,7 @@ export const useApi = () => {
         requestBody,
         {
           headers: {
-            authorization: authUser.id,
+            authorization: session.accessToken,
           },
         }
       );
@@ -240,7 +240,7 @@ export const useApi = () => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -257,10 +257,10 @@ export const useApi = () => {
 
   const requestCancelSubscription = async () => {
     try {
-      if (!authUser?.id) {
-        throw new Error("user not found", {
+      if (!session?.accessToken) {
+        throw new Error("session not found", {
           cause: {
-            user: authUser,
+            session,
           },
         });
       }
@@ -272,7 +272,7 @@ export const useApi = () => {
         {},
         {
           headers: {
-            authorization: authUser.id,
+            authorization: session.accessToken,
           },
         }
       );
@@ -292,7 +292,7 @@ export const useApi = () => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -311,10 +311,10 @@ export const useApi = () => {
     currentPeriodEnd: number;
   } | null> => {
     try {
-      if (!authUser?.id) {
-        throw new Error("user not found", {
+      if (!session?.accessToken) {
+        throw new Error("session not found", {
           cause: {
-            user: authUser,
+            session,
           },
         });
       }
@@ -323,7 +323,7 @@ export const useApi = () => {
 
       const response = await axios.get("/api/billing/subscription/get", {
         headers: {
-          authorization: authUser.id,
+          authorization: session.accessToken,
         },
       });
 
@@ -337,7 +337,7 @@ export const useApi = () => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 

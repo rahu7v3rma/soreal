@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useSupabase } from "@/context/supabase";
 import { useConsentCookie } from "@/context/consent-cookie";
 import usePaths from "@/hooks/paths";
-import Image from "next/image";
 import Link from "next/link";
 
 const Header = () => {
@@ -23,14 +22,12 @@ const Header = () => {
             className="flex items-center justify-center"
             title="Go to Homepage"
           >
-            <Image
-              src={`https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png`}
+            <img
+              src="https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
               alt="Soreal"
               width={120}
               height={32}
               style={{ height: "auto" }}
-              priority
-              quality={95}
             />
           </Link>
           <nav className="hidden md:flex items-center space-x-8">
@@ -92,18 +89,29 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-8">
-              <Image
-                src={`https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png`}
+              <img
+                src="https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
                 alt="Soreal"
                 width={120}
                 height={32}
                 style={{ height: "auto" }}
-                quality={95}
               />
             </div>
           </div>
 
-          <div></div>
+          <div>
+            <h3 className="font-semibold tracking-[-0.01em] mb-4">Resource</h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/blog"
+                  className="text-sm font-light text-gray-600 hover:text-gray-900"
+                >
+                  Blog
+                </Link>
+              </li>
+            </ul>
+          </div>
 
           <div>
             <h3 className="font-semibold tracking-[-0.01em] mb-4">Company</h3>

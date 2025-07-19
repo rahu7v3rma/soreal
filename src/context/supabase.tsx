@@ -105,6 +105,16 @@ export interface ApiKey {
   revoked: boolean;
 }
 
+export interface AdminApiKey {
+  id: string;
+  user_id: string;
+  api_key_token: string;
+  permissions: string[];
+  revoked: boolean;
+  created_at: string;
+  key_name: string;
+}
+
 interface SupabaseContextType {
   session: Session | null;
   authUser: AuthUser | null;
@@ -115,6 +125,7 @@ interface SupabaseContextType {
   generations: Generation[];
   blogs: Blog[];
   apiKeys: ApiKey[];
+  adminApiKeys: AdminApiKey[];
   changePasswordEmail: string | null;
   setChangePasswordEmail: (email: string) => void;
   signupLoading: boolean;
@@ -163,15 +174,15 @@ interface SupabaseContextType {
   getUserTopupLoading: boolean;
   getUserSubscription: () => Promise<boolean>;
   getUserSubscriptionLoading: boolean;
-  logout: () => Promise<boolean>;
+  logout: (options?: { redirectTo: string }) => Promise<boolean>;
   logoutLoading: boolean;
   deleteUser: () => Promise<boolean>;
   deleteUserLoading: boolean;
   getUserGenerations: () => Promise<boolean>;
   getUserGenerationsLoading: boolean;
-  getBlogs: () => Promise<boolean>;
+  getBlogs: ({ archived }: { archived?: boolean }) => Promise<boolean>;
   getBlogsLoading: boolean;
-  getBlog: (id: string) => Promise<Blog | null>;
+  getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise<Blog | null>;
   getBlogLoading: boolean;
   createBlog: ({
     title,
@@ -245,6 +256,21 @@ interface SupabaseContextType {
     { revoked }: { revoked?: boolean }
   ) => Promise<boolean>;
   updateApiKeyLoading: boolean;
+  getAdminApiKeys: () => Promise<boolean>;
+  getAdminApiKeysLoading: boolean;
+  addAdminApiKey: ({
+    permissions,
+    keyName,
+  }: {
+    permissions: string[];
+    keyName: string;
+  }) => Promise<boolean>;
+  addAdminApiKeyLoading: boolean;
+  updateAdminApiKey: (
+    id: string,
+    { revoked }: { revoked?: boolean }
+  ) => Promise<boolean>;
+  updateAdminApiKeyLoading: boolean;
   uploadImage: (
     file: File,
     imageType: "reference" | "avatar" | "blog"
@@ -279,8 +305,9 @@ const SupabaseContext = createContext<SupabaseContextType>({
   generations: [],
   blogs: [],
   apiKeys: [],
+  adminApiKeys: [],
   changePasswordEmail: null,
-  setChangePasswordEmail: () => {},
+  setChangePasswordEmail: () => { },
   signupLoading: false,
   signup: () => Promise.resolve(false),
   createUserProfile: () => Promise.resolve(false),
@@ -308,15 +335,15 @@ const SupabaseContext = createContext<SupabaseContextType>({
   getUserTopupLoading: false,
   getUserSubscription: () => Promise.resolve(false),
   getUserSubscriptionLoading: false,
-  logout: () => Promise.resolve(false),
+  logout: (options?: { redirectTo: string }) => Promise.resolve(false),
   logoutLoading: false,
   deleteUser: () => Promise.resolve(false),
   deleteUserLoading: false,
   getUserGenerations: () => Promise.resolve(false),
   getUserGenerationsLoading: false,
-  getBlogs: () => Promise.resolve(false),
+  getBlogs: ({ archived }: { archived?: boolean } = {}) => Promise.resolve(false),
   getBlogsLoading: false,
-  getBlog: () => Promise.resolve(null),
+  getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise.resolve(null),
   getBlogLoading: false,
   createBlog: () => Promise.resolve(false),
   createBlogLoading: false,
@@ -332,6 +359,12 @@ const SupabaseContext = createContext<SupabaseContextType>({
   addApiKeyLoading: false,
   updateApiKey: () => Promise.resolve(false),
   updateApiKeyLoading: false,
+  getAdminApiKeys: () => Promise.resolve(false),
+  getAdminApiKeysLoading: false,
+  addAdminApiKey: () => Promise.resolve(false),
+  addAdminApiKeyLoading: false,
+  updateAdminApiKey: () => Promise.resolve(false),
+  updateAdminApiKeyLoading: false,
   uploadImage: () => Promise.resolve(""),
   uploadImageLoading: false,
   deleteUserGeneration: () => Promise.resolve(false),
@@ -364,6 +397,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [adminApiKeys, setAdminApiKeys] = useState<AdminApiKey[]>([]);
   const [changePasswordEmail, setChangePasswordEmail] = useState<string | null>(
     null
   );
@@ -401,6 +435,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [getApiKeysLoading, setGetApiKeysLoading] = useState(false);
   const [addApiKeyLoading, setAddApiKeyLoading] = useState(false);
   const [updateApiKeyLoading, setUpdateApiKeyLoading] = useState(false);
+  const [getAdminApiKeysLoading, setGetAdminApiKeysLoading] = useState(false);
+  const [addAdminApiKeyLoading, setAddAdminApiKeyLoading] = useState(false);
+  const [updateAdminApiKeyLoading, setUpdateAdminApiKeyLoading] = useState(false);
   const [uploadImageLoading, setUploadImageLoading] = useState(false);
   const [deleteUserGenerationLoading, setDeleteUserGenerationLoading] =
     useState(false);
@@ -481,7 +518,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
 
         Sentry.captureException(error, {
           extra: {
-            cause: error?.cause,
+            cause: JSON.stringify(error?.cause),
           },
         });
       } else {
@@ -572,7 +609,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -635,7 +672,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -708,7 +745,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -751,7 +788,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -874,7 +911,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
 
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -931,7 +968,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -980,7 +1017,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -1021,7 +1058,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -1079,7 +1116,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -1263,7 +1300,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -1315,7 +1352,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -1369,7 +1406,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -1382,7 +1419,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const logout = async () => {
+  const logout = async (options?: { redirectTo: string }) => {
     try {
       setLogoutLoading(true);
 
@@ -1402,6 +1439,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       setGenerations([]);
       setBlogs([]);
       setApiKeys([]);
+      setAdminApiKeys([]);
       removeUserSubscriptionCookie();
       removeUserRoleCookie();
 
@@ -1414,14 +1452,14 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      router.push("/login");
+      const redirectTo = options?.redirectTo || "/login";
+      router.push(redirectTo);
 
       return true;
     } catch (error: unknown) {
-      console.log("logout error", error);
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -1439,9 +1477,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
 
   const deleteUser = async () => {
     try {
-      if (!authUser?.id) {
-        throw new Error("User not authenticated", {
-          cause: "User not authenticated",
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: "Session not found",
         });
       }
 
@@ -1449,7 +1487,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
 
       const response = await axios.delete("/api/user/", {
         headers: {
-          authorization: authUser.id,
+          authorization: session.accessToken,
         },
       });
       if (!response?.data?.success) {
@@ -1472,7 +1510,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -1521,7 +1559,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       if (isDashboardPath) {
         Sentry.captureException(error, {
-          extra: { cause: error instanceof Error ? error.cause : undefined },
+          extra: { cause: error instanceof Error ? JSON.stringify(error.cause) : undefined },
         });
       }
 
@@ -1533,7 +1571,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getBlogs = async () => {
+  const getBlogs = async ({ archived }: { archived?: boolean } = {}) => {
     try {
       setGetBlogsLoading(true);
 
@@ -1555,10 +1593,16 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      const getBlogsResponse = await supabase
+      let query = supabase
         .from("blogs")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
+
+      // Only filter by archived status if the parameter is provided
+      if (archived !== undefined) {
+        query = query.eq("archived", archived);
+      }
+
+      const getBlogsResponse = await query.order("created_at", { ascending: false });
 
       if (!getBlogsResponse.data) {
         throw new Error("Failed to get blogs", {
@@ -1584,7 +1628,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getBlog = async (id: string): Promise<Blog | null> => {
+
+
+  const getBlog = async ({ id, slug }: { id?: string; slug?: string }): Promise<Blog | null> => {
     try {
       setGetBlogLoading(true);
 
@@ -1606,19 +1652,26 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      if (!id) {
-        throw new Error("Blog ID is required", {
-          cause: { id },
+      if (!id && !slug) {
+        throw new Error("Either Blog ID or slug is required", {
+          cause: { id, slug },
         });
       }
 
-      const getBlogResponse = await supabase
-        .from("blogs")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      console.log("getBlogResponse", getBlogResponse);
+      let getBlogResponse;
+      if (id) {
+        getBlogResponse = await supabase
+          .from("blogs")
+          .select("*")
+          .eq("id", id)
+          .single();
+      } else {
+        getBlogResponse = await supabase
+          .from("blogs")
+          .select("*")
+          .eq("slug", slug)
+          .single();
+      }
 
       if (!getBlogResponse.data) {
         throw new Error("Blog not found", {
@@ -1697,7 +1750,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       });
 
       // Refresh the blogs list
-      await getBlogs();
+      await getBlogs({});
 
       return true;
     } catch (error: any) {
@@ -1808,7 +1861,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       });
 
       // Refresh the blogs list
-      await getBlogs();
+      await getBlogs({});
 
       return true;
     } catch (error: any) {
@@ -1871,7 +1924,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       });
 
       // Refresh the blogs list
-      await getBlogs();
+      await getBlogs({});
 
       return true;
     } catch (error: any) {
@@ -1942,7 +1995,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       if (isDashboardPath) {
         Sentry.captureException(error, {
           extra: {
-            cause: error instanceof Error ? error.cause : undefined,
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
           },
         });
       }
@@ -2020,7 +2073,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -2105,7 +2158,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -2118,6 +2171,197 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       return false;
     } finally {
       setUpdateApiKeyLoading(false);
+    }
+  };
+
+  const getAdminApiKeys = async () => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      setGetAdminApiKeysLoading(true);
+
+      const getAdminApiKeys = await supabase
+        .from("admin_api_keys")
+        .select("*")
+        .eq("user_id", authUser?.id)
+        .order("created_at", { ascending: false });
+      if (!getAdminApiKeys.data) {
+        throw new Error("Failed to fetch admin API keys", {
+          cause: getAdminApiKeys,
+        });
+      }
+
+      setAdminApiKeys(getAdminApiKeys.data);
+
+      return true;
+    } catch (error: unknown) {
+      if (isDashboardPath) {
+        Sentry.captureException(error, {
+          extra: {
+            cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
+          },
+        });
+      }
+
+      setAdminApiKeys([]);
+
+      return false;
+    } finally {
+      setGetAdminApiKeysLoading(false);
+    }
+  };
+
+  const addAdminApiKey = async ({
+    permissions,
+    keyName,
+  }: {
+    permissions: string[];
+    keyName: string;
+  }) => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      setAddAdminApiKeyLoading(true);
+
+      const insertAdminApiKey = await supabase
+        .from("admin_api_keys")
+        .insert({
+          user_id: authUser?.id,
+          api_key_token: generateId(40),
+          permissions: permissions,
+          key_name: keyName,
+        })
+        .select()
+        .single();
+      if (!insertAdminApiKey.data || insertAdminApiKey.error) {
+        throw new Error("Failed to insert admin API key", {
+          cause: insertAdminApiKey,
+        });
+      }
+
+      toast({
+        title: "Successfully created admin API key",
+        duration: 5000,
+      });
+
+      return true;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: {
+          cause: JSON.stringify(error?.cause),
+        },
+      });
+
+      toast({
+        title: "Something went wrong while creating your admin API key",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setAddAdminApiKeyLoading(false);
+    }
+  };
+
+  const updateAdminApiKey = async (
+    id: string,
+    { revoked }: { revoked?: boolean }
+  ) => {
+    try {
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID not found", {
+          cause: authUser,
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      setUpdateAdminApiKeyLoading(true);
+
+      const updateParams: {
+        revoked?: boolean;
+      } = {};
+      if (revoked !== undefined) {
+        updateParams.revoked = revoked;
+      }
+
+      const revokeAdminApiKey = await supabase
+        .from("admin_api_keys")
+        .update(updateParams)
+        .eq("id", id)
+        .select()
+        .single();
+      if (!revokeAdminApiKey.data || revokeAdminApiKey.error) {
+        throw new Error("Failed to revoke admin API key", {
+          cause: revokeAdminApiKey,
+        });
+      }
+
+      toast({
+        title: "Successfully updated admin API key",
+        duration: 5000,
+      });
+
+      return true;
+    } catch (error: any) {
+      Sentry.captureException(error, {
+        extra: {
+          cause: JSON.stringify(error?.cause),
+        },
+      });
+
+      toast({
+        title: "Something went wrong while updating your admin API key",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setUpdateAdminApiKeyLoading(false);
     }
   };
 
@@ -2205,7 +2449,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -2276,7 +2520,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: unknown) {
       Sentry.captureException(error, {
         extra: {
-          cause: error instanceof Error ? error.cause : undefined,
+          cause: error instanceof Error ? JSON.stringify(error.cause) : undefined,
         },
       });
 
@@ -2300,12 +2544,24 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       getAuthUser();
     }
     if (session?.accessToken && authUser?.id) {
-      getUserProfile();
-      getUserTopup();
-      getUserSubscription();
-      getUserGenerations();
-      getApiKeys();
-      getUserRole();
+      if (!userProfile) {
+        getUserProfile();
+      }
+      if (!userTopup) {
+        getUserTopup();
+      }
+      if (!userSubscription) {
+        getUserSubscription();
+      }
+      if (!generations) {
+        getUserGenerations();
+      }
+      if (!apiKeys) {
+        getApiKeys();
+      }
+      if (!userRole) {
+        getUserRole();
+      }
     }
   };
 
@@ -2343,7 +2599,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       Sentry.captureException(error, {
         extra: {
-          cause: error?.cause,
+          cause: JSON.stringify(error?.cause),
         },
       });
 
@@ -2380,9 +2636,27 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     });
   }, [userSubscription, isSubscriptionExpired]);
 
+  // Listen for auth state changes and sync session state and cookie
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        if (newSession?.access_token) {
+          // Update React state
+          setSession({ accessToken: newSession.access_token });
+          
+          // Update cookie
+          Cookies.set(ACCESS_TOKEN_COOKIE_KEY, newSession.access_token);
+        }
+      }
+    );
+
+    return () => listener.subscription.unsubscribe();
+  }, []);
+  
   useEffect(() => {
     if (userRole?.role_type === USER_ROLES.ADMIN) {
-      getBlogs();
+      getBlogs({});
+      getAdminApiKeys();
     }
   }, [userRole]);
 
@@ -2396,6 +2670,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     generations,
     blogs,
     apiKeys,
+    adminApiKeys,
     changePasswordEmail,
     setChangePasswordEmail,
     signup,
@@ -2448,6 +2723,12 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     addApiKeyLoading,
     updateApiKey,
     updateApiKeyLoading,
+    getAdminApiKeys,
+    getAdminApiKeysLoading,
+    addAdminApiKey,
+    addAdminApiKeyLoading,
+    updateAdminApiKey,
+    updateAdminApiKeyLoading,
     uploadImage,
     uploadImageLoading,
     deleteUserGeneration,

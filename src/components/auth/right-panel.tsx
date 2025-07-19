@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import { images, content } from "@/constants/auth/right-panel";
 
 export function AuthRightPanel({
@@ -31,13 +30,10 @@ export function AuthRightPanel({
               zIndex: index === currentImageIndex ? 1 : 0,
             }}
           >
-            <Image
+            <img
               src={image}
               alt="Soreal background"
-              fill
-              style={{ objectFit: "cover" }}
-              priority={index === 0}
-              quality={90}
+              className="w-full h-full object-cover"
             />
           </div>
         ))}

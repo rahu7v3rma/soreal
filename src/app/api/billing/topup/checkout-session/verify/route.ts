@@ -5,8 +5,10 @@ import {
   getTopupPriceCreditAmount,
   getTopupPriceId,
   getTopupQuantity,
+  stripe,
 } from "@/lib/stripe";
 import { supabaseAdmin } from "@/lib/supabase/admin";
+import { sendPaymentReceipt } from "@/lib/resend";
 import { topupCheckoutSessionVerifyRequestQuerySchema } from "@/lib/zod-schema/billing";
 import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
@@ -107,6 +109,30 @@ async function postHandler(request: MiddlewareRequest) {
       });
     }
 
+    // Get payment intent from checkout session and send receipt
+    try {
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        session.payment_intent as string
+      );
+      const charge = await stripe.charges.retrieve(
+        paymentIntent.latest_charge as string
+      );
+      
+      // Use receipt_url for custom email
+      const receiptUrl = charge.receipt_url;
+      if (receiptUrl && user.email) {
+        await sendPaymentReceipt(user.email, receiptUrl);
+      }
+    } catch (receiptError) {
+      // Log the error but don't fail the payment process
+      Sentry.captureException(receiptError, {
+        extra: {
+          userId: user.id,
+          paymentIntentId: session.payment_intent,
+        },
+      });
+    }
+
     return NextResponse.redirect(
       new URL("/billing?topup_payment_success=1", request.url),
       { status: 302 }
@@ -114,7 +140,7 @@ async function postHandler(request: MiddlewareRequest) {
   } catch (error: any) {
     Sentry.captureException(error, {
       extra: {
-        cause: error?.cause,
+        cause: JSON.stringify(error?.cause),
       },
     });
 

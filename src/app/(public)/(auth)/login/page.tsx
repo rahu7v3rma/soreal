@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSupabase } from "@/context/supabase";
 import { ChevronRight, Eye, EyeOff, Home, Loader, LogIn } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -47,14 +46,12 @@ const Page = () => {
           <div className="w-full max-w-md space-y-6">
             <div>
               <Link href="/" className="mb-8 block mx-auto text-center">
-                <Image
-                  src={`https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png`}
+                <img
+                  src="https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
                   alt="Soreal"
                   width={240}
                   height={64}
                   style={{ height: "auto" }}
-                  priority
-                  quality={95}
                   className="mb-4 mx-auto"
                 />
               </Link>
