@@ -182,6 +182,10 @@ interface SupabaseContextType {
   getUserGenerationsLoading: boolean;
   getBlogs: ({ archived }: { archived?: boolean }) => Promise<boolean>;
   getBlogsLoading: boolean;
+  deleteBlogs: ({ blogIds }: { blogIds: string[] }) => Promise<boolean>;
+  deleteBlogsLoading: boolean;
+  updateBlogs: ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } }) => Promise<boolean>;
+  updateBlogsLoading: boolean;
   getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise<Blog | null>;
   getBlogLoading: boolean;
   createBlog: ({
@@ -343,6 +347,10 @@ const SupabaseContext = createContext<SupabaseContextType>({
   getUserGenerationsLoading: false,
   getBlogs: ({ archived }: { archived?: boolean } = {}) => Promise.resolve(false),
   getBlogsLoading: false,
+  deleteBlogs: ({ blogIds }: { blogIds: string[] } = { blogIds: [] }) => Promise.resolve(false),
+  deleteBlogsLoading: false,
+  updateBlogs: ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } } = { blogIds: [], values: { archived: false } }) => Promise.resolve(false),
+  updateBlogsLoading: false,
   getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise.resolve(null),
   getBlogLoading: false,
   createBlog: () => Promise.resolve(false),
@@ -428,6 +436,8 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [getUserGenerationsLoading, setGetUserGenerationsLoading] =
     useState(false);
   const [getBlogsLoading, setGetBlogsLoading] = useState(false);
+  const [deleteBlogsLoading, setDeleteBlogsLoading] = useState(false);
+  const [updateBlogsLoading, setUpdateBlogsLoading] = useState(false);
   const [getBlogLoading, setGetBlogLoading] = useState(false);
   const [createBlogLoading, setCreateBlogLoading] = useState(false);
   const [updateBlogLoading, setUpdateBlogLoading] = useState(false);
@@ -1628,6 +1638,149 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const deleteBlogs = async ({ blogIds }: { blogIds: string[] }) => {
+    try {
+      setDeleteBlogsLoading(true);
+
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID is required", {
+          cause: { authUser },
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      if (!blogIds || blogIds.length === 0) {
+        return true;
+      }
+
+      const response = await supabase
+        .from("blogs")
+        .delete()
+        .in("id", blogIds)
+        .select("id");
+
+      if (!response.data || response.error) {
+        throw new Error("Failed to delete blogs", {
+          cause: { response },
+        });
+      }
+
+      toast({
+        title: `Successfully deleted ${response.data.length} blog${response.data.length !== 1 ? 's' : ''}`,
+        duration: 5000,
+      });
+
+      // Refresh the blogs list
+      await getBlogs({});
+
+      return true;
+    } catch (error: any) {
+      if (isDashboardPath) {
+        Sentry.captureException(error, {
+          extra: { cause: JSON.stringify(error?.cause) },
+        });
+      }
+
+      toast({
+        title: "Something went wrong while deleting blogs",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setDeleteBlogsLoading(false);
+    }
+  };
+
+  const updateBlogs = async ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } }) => {
+    try {
+      setUpdateBlogsLoading(true);
+
+      if (!session?.accessToken) {
+        throw new Error("Session not found", {
+          cause: session,
+        });
+      }
+
+      if (!authUser?.id) {
+        throw new Error("User ID is required", {
+          cause: { authUser },
+        });
+      }
+
+      if (userRole?.role_type !== USER_ROLES.ADMIN) {
+        throw new Error("Admin access required", {
+          cause: { userRole },
+        });
+      }
+
+      if (!blogIds || blogIds.length === 0) {
+        return true;
+      }
+
+      const updateParams: {
+        archived?: boolean;
+        updated_at: string;
+      } = {
+        updated_at: new Date().toISOString(),
+      };
+
+      if (typeof values.archived === "boolean") {
+        updateParams.archived = values.archived;
+      }
+
+      const response = await supabase
+        .from("blogs")
+        .update(updateParams)
+        .in("id", blogIds)
+        .select("id");
+
+      if (!response.data || response.error) {
+        throw new Error("Failed to update blogs", {
+          cause: { response },
+        });
+      }
+
+      toast({
+        title: `Successfully updated ${response.data.length} blog${response.data.length !== 1 ? 's' : ''}`,
+        duration: 5000,
+      });
+
+      // Refresh the blogs list
+      await getBlogs({});
+
+      return true;
+    } catch (error: any) {
+      if (isDashboardPath) {
+        Sentry.captureException(error, {
+          extra: { cause: JSON.stringify(error?.cause) },
+        });
+      }
+
+      toast({
+        title: "Something went wrong while updating blogs",
+        variant: "destructive",
+        duration: 5000,
+      });
+
+      return false;
+    } finally {
+      setUpdateBlogsLoading(false);
+    }
+  };
+
 
 
   const getBlog = async ({ id, slug }: { id?: string; slug?: string }): Promise<Blog | null> => {
@@ -2707,6 +2860,10 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     getUserGenerationsLoading,
     getBlogs,
     getBlogsLoading,
+    deleteBlogs,
+    deleteBlogsLoading,
+    updateBlogs,
+    updateBlogsLoading,
     getBlog,
     getBlogLoading,
     createBlog,

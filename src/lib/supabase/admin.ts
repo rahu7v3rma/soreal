@@ -21,7 +21,7 @@ export interface Blog {
   archived?: boolean;
 }
 
-export const getBlogs = async ({ archived }: { archived?: boolean } = {}): Promise<Blog[]> => {
+export const getBlogs = async ({ archived, limit }: { archived?: boolean; limit?: number } = {}): Promise<Blog[]> => {
   try {
     let query = supabaseAdmin
       .from("blogs")
@@ -30,6 +30,11 @@ export const getBlogs = async ({ archived }: { archived?: boolean } = {}): Promi
     // Only filter by archived status if the parameter is provided
     if (archived !== undefined) {
       query = query.eq("archived", archived);
+    }
+
+    // Apply limit if provided
+    if (limit !== undefined) {
+      query = query.limit(limit);
     }
 
     const response = await query.order("created_at", { ascending: false });

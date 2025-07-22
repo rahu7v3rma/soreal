@@ -38,10 +38,10 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
 
     if (loading) {
         return (
-            <div className="space-y-6 w-full max-w-4xl">
+            <div className="space-y-6 w-full max-w-4xl bg-background dark:bg-zinc-800 text-foreground dark:text-white">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Preview Blog</h1>
-                    <p className="text-muted-foreground">Loading preview...</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">Preview Blog</h1>
+                    <p className="text-muted-foreground dark:text-zinc-300">Loading preview...</p>
                 </div>
             </div>
         );
@@ -51,10 +51,10 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
 
     if (!displayBlog) {
         return (
-            <div className="space-y-6 w-full max-w-4xl">
+            <div className="space-y-6 w-full max-w-4xl bg-background dark:bg-zinc-800 text-foreground dark:text-white">
                 <div className="flex flex-col gap-2">
-                    <h1 className="text-3xl font-bold tracking-tight">Preview Blog</h1>
-                    <p className="text-muted-foreground text-red-600">
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">Preview Blog</h1>
+                    <p className="text-muted-foreground dark:text-zinc-300 text-red-600">
                         Blog not found or failed to load.
                     </p>
                 </div>
@@ -76,23 +76,23 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
     };
 
     return (
-        <div className="space-y-6 w-full max-w-4xl relative">
+        <div className="space-y-6 w-full max-w-4xl relative bg-background dark:bg-zinc-800 text-foreground dark:text-white">
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-bold tracking-tight">Preview Blog</h1>
-                <p className="text-muted-foreground">
+                <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">Preview Blog</h1>
+                <p className="text-muted-foreground dark:text-zinc-300">
                     {previewBlog ? "Live preview (unsaved changes)" : "Preview from database"}
                 </p>
             </div>
 
-            <div className="border rounded-lg p-8 bg-white">
+            <div className="border border-border dark:border-zinc-600 rounded-lg p-8 bg-white dark:bg-zinc-800">
                 <article className="prose prose-lg max-w-none">
                     {/* Blog Title */}
-                    <h1 className="text-4xl font-bold text-gray-900 mb-6">
+                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
                         {displayBlog.title || "Untitled Blog"}
                     </h1>
 
                     {/* Published Date */}
-                    <div className="text-gray-600 mb-8">
+                    <div className="text-gray-600 dark:text-zinc-300 mb-8">
                         {fallbackBlog && fallbackBlog.created_at && (
                             <>
                                 Published on{" "}
@@ -121,7 +121,7 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
                             <img
                                 src={featuredImageUrl}
                                 alt={displayBlog.title || "Featured image"}
-                                className="w-full h-[400px] rounded-lg object-cover"
+                                className="w-full h-[400px] rounded-lg object-cover border border-border dark:border-zinc-600"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                 }}
@@ -131,7 +131,7 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
 
                     {/* Blog Content */}
                     <div 
-                        className="prose prose-lg max-w-none text-gray-800 leading-relaxed"
+                        className="prose prose-lg max-w-none text-gray-800 dark:text-zinc-200 leading-relaxed"
                         dangerouslySetInnerHTML={{
                             __html: displayBlog.content || "No content available."
                         }}

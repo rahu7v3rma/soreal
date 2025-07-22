@@ -14,12 +14,14 @@ import {
 import { SorealLogo } from "@/components/ui/logo";
 import { adminNavItems } from "@/constants/admin";
 import { useSupabase } from "@/context/supabase";
+import { useTheme } from "@/context/theme";
 import { cn } from "@/lib/utils/common";
 import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,20 +37,21 @@ export default function AdminDashboardLayout({
     userProfile,
     logout,
   } = useSupabase();
+  const { mode } = useTheme();
   const pathname = usePathname();
 
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background w-full overflow-visible pb-6 relative">
+    <div className="flex min-h-screen bg-background dark:bg-zinc-800 dark:text-white w-full overflow-visible pb-6 relative">
       <div className="fixed inset-y-0 left-0 z-30">
         <div
           className={cn(
-            "flex flex-col h-screen bg-card border-r border-border transition-all duration-300 overflow-hidden",
+            "flex flex-col h-screen bg-card dark:bg-zinc-800 border-r border-border dark:border-zinc-600 transition-all duration-300 overflow-hidden",
             collapsed ? "w-[70px]" : "w-[240px]"
           )}
         >
-          <div className="flex items-center h-16 px-4 border-b border-border">
+          <div className="flex items-center h-16 px-4 border-b border-border dark:border-zinc-600">
             <Link
               href="/admin/dashboard"
               className={cn(
@@ -58,7 +61,10 @@ export default function AdminDashboardLayout({
             >
               <div className="flex items-center relative">
                 <img
-                  src="https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
+                  src={mode === "dark" 
+                    ? "https://api.soreal.app/assets/png/logo/soreal-logo-white.png"
+                    : "https://api.soreal.app/assets/png/logo/soreal-logo-rgb-transparent-2x.png"
+                  }
                   alt="Soreal"
                   width={collapsed ? 32 : 120}
                   height={collapsed ? 8 : 32}
@@ -67,7 +73,7 @@ export default function AdminDashboardLayout({
                 {!collapsed && (
                   <Badge
                     variant="outline"
-                    className=" bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100 -ml-2 text-[10px] px-2 py-0.5"
+                    className=" bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100 dark:bg-teal-800/30 dark:text-teal-200 dark:border-teal-500 dark:hover:bg-teal-900/40 -ml-2 text-[10px] px-2 py-0.5"
                   >
                     Admin
                   </Badge>
@@ -119,12 +125,29 @@ export default function AdminDashboardLayout({
             </nav>
           </div>
 
-          <div className="p-3 pt-2 border-t border-border pb-8">
-            <nav className="space-y-2 flex flex-col">
+          <div className="p-3 pt-2 border-t border-border dark:border-zinc-600 pb-8">
+            <nav className="space-y-1">
+              <Link href="/admin/dashboard/settings" passHref>
+                <Button
+                  variant={
+                    pathname === "/admin/dashboard/settings"
+                      ? "active"
+                      : "ghost"
+                  }
+                  className={cn(
+                    "w-full justify-start mb-1 relative",
+                    collapsed ? "px-2" : "px-3"
+                  )}
+                  size={collapsed ? "icon" : "default"}
+                >
+                  <Settings className="h-5 w-5" />
+                  {!collapsed && <span className="ml-2">Settings</span>}
+                </Button>
+              </Link>
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start text-muted-foreground hover:text-foreground mt-2 rounded-lg",
+                  "w-full justify-start mb-1 relative",
                   collapsed ? "px-2" : "px-3"
                 )}
                 size={collapsed ? "icon" : "default"}
@@ -144,8 +167,8 @@ export default function AdminDashboardLayout({
         className="flex flex-col flex-1 w-full transition-all duration-300"
         style={{ marginLeft: "var(--sidebar-width, 240px)" }}
       >
-        <div className="h-16 bg-background w-full flex items-center z-10">
-          <div className="sticky top-0 right-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b">
+        <div className="h-16 bg-background dark:bg-zinc-800 text-foreground dark:text-white w-full flex items-center z-10">
+          <div className="sticky top-0 right-0 w-full bg-background/95 dark:bg-zinc-800/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-zinc-800/60 z-50 border-b dark:border-zinc-600">
             <div className="h-16 flex items-center justify-end px-4 max-w-full">
               <div className="flex items-center gap-3 pr-0">
                 <DropdownMenu>
@@ -167,18 +190,18 @@ export default function AdminDashboardLayout({
                           <div className="font-medium text-xs">
                             {userProfile?.username || "Admin"}
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
+                          <div className="text-[10px] text-muted-foreground dark:text-zinc-100">
                             Admin Account
                           </div>
                         </div>
-                        <ChevronDown className="h-3 w-3 text-muted-foreground ml-1" />
+                        <ChevronDown className="h-3 w-3 text-muted-foreground dark:text-zinc-100 ml-1" />
                       </div>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>Admin Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout({ redirectTo: "/admin/login" })}>Logout</DropdownMenuItem>
+                  <DropdownMenuContent align="end" className="w-56 dark:bg-zinc-700 dark:border-zinc-600">
+                    <DropdownMenuLabel className="dark:text-white">Admin Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="dark:bg-zinc-600" />
+                    <DropdownMenuItem onClick={() => logout({ redirectTo: "/admin/login" })} className="dark:text-white dark:hover:bg-zinc-600">Logout</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -186,7 +209,7 @@ export default function AdminDashboardLayout({
           </div>
         </div>
         <main className="flex-1 w-full overflow-visible">
-          <div className="container h-full px-3 md:px-4 max-w-7xl mx-auto py-6 md:py-8 pb-12 bg-white">
+          <div className="container h-full px-3 md:px-4 max-w-7xl mx-auto py-6 md:py-8 pb-12 bg-white dark:bg-zinc-800 text-foreground dark:text-white">
             {children}
           </div>
         </main>

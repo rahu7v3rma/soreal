@@ -91,6 +91,7 @@ export const adminAccessMiddleware =
         .from("admin_api_keys")
         .select("permissions")
         .eq("api_key_token", apiKey)
+        .filter("revoked", "not.is", true)
         .single();
 
       if (apiKeyError || !apiKeyData) {

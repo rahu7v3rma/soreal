@@ -23,7 +23,7 @@ const updateBlogSchema = z.object({
         .string()
         .min(1, "Title is required")
         .max(200, "Title must be less than 200 characters"),
-    content: z.string().min(1, "Content is required"),
+    content: z.string().min(1, "Content is required").max(10000, "Content must be less than 10000 characters"),
     slug: z
         .string()
         .min(1, "Slug is required")
@@ -45,6 +45,7 @@ const updateBlogSchema = z.object({
     featured_image_url: z
         .string()
         .url("Must be a valid URL")
+        .max(300, "Featured image URL must be less than 300 characters")
         .optional()
         .or(z.literal("")),
     archived: z.boolean(),
@@ -159,34 +160,44 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Title Field */}
             <div className="space-y-2">
-                <Label htmlFor="title">Title *</Label>
+                <Label htmlFor="title" className="text-foreground dark:text-white">Title *</Label>
                 <Input
                     id="title"
                     placeholder="Enter blog title..."
                     {...register("title")}
-                    className={errors.title ? "border-destructive" : ""}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        const truncatedValue = value.length > 200 ? value.slice(0, 200) : value;
+                        setValue("title", truncatedValue);
+                    }}
+                    className={`${errors.title ? "border-destructive" : ""} bg-background dark:bg-zinc-700 border-border dark:border-zinc-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-400`}
                 />
-                {errors.title && (
-                    <p className="text-sm text-destructive">{errors.title.message}</p>
-                )}
+                <div className="flex justify-between">
+                    {errors.title && (
+                        <p className="text-sm text-destructive">{errors.title.message}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground dark:text-zinc-400 ml-auto">
+                        {watch("title")?.length || 0}/200 characters
+                    </p>
+                </div>
             </div>
 
             {/* Slug Field */}
             <div className="space-y-2">
-                <Label htmlFor="slug">Slug *</Label>
+                <Label htmlFor="slug" className="text-foreground dark:text-white">Slug *</Label>
                 <div>
                     <Input
                         id="slug"
                         placeholder="blog-url-slug"
                         {...register("slug")}
                         disabled={true}
-                        className={errors.slug ? "border-destructive" : ""}
+                        className={`${errors.slug ? "border-destructive" : ""} bg-background dark:bg-zinc-700 border-border dark:border-zinc-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-400`}
                     />
                 </div>
                 {errors.slug && (
                     <p className="text-sm text-destructive">{errors.slug.message}</p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground dark:text-zinc-400">
                     This will be used in the blog URL. Only lowercase letters, numbers,
                     and hyphens are allowed.
                 </p>
@@ -194,29 +205,41 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
 
             {/* Content Field */}
             <div className="space-y-2">
-                <Label htmlFor="content">Content *</Label>
+                <Label htmlFor="content" className="text-foreground dark:text-white">Content *</Label>
                 <Textarea
                     id="content"
                     placeholder="Write your blog content here..."
                     {...register("content")}
-                    className={`min-h-[300px] ${errors.content ? "border-destructive" : ""}`}
+                    className={`min-h-[300px] ${errors.content ? "border-destructive" : ""} bg-background dark:bg-zinc-700 border-border dark:border-zinc-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-400`}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        const truncatedValue = value.length > 10000 ? value.slice(0, 10000) : value;
+                        setValue("content", truncatedValue);
+                    }}
                 />
-                {errors.content && (
-                    <p className="text-sm text-destructive">{errors.content.message}</p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                    Available formats: text, html
-                </p>
+                <div className="flex justify-between">
+                    <div>
+                        {errors.content && (
+                            <p className="text-sm text-destructive">{errors.content.message}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground dark:text-zinc-400">
+                            Available formats: text, html
+                        </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground dark:text-zinc-400">
+                        {watch("content")?.length || 0}/10000 characters
+                    </p>
+                </div>
             </div>
 
             {/* Upload Featured Image Field */}
             <div className="space-y-2">
-                <Label htmlFor="featured_image_file">Upload Featured Image</Label>
+                <Label htmlFor="featured_image_file" className="text-foreground dark:text-white">Upload Featured Image</Label>
                 <FileInput
                     id="featured_image_file"
                     accept="image/*"
                     {...register("featured_image_file")}
-                    className={errors.featured_image_file ? "border-destructive" : ""}
+                    className={`${errors.featured_image_file ? "border-destructive" : ""} bg-background dark:bg-zinc-700 border-border dark:border-zinc-600`}
                 />
                 {errors.featured_image_file && (
                     <p className="text-sm text-destructive">
@@ -225,19 +248,19 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
                             : "Please select a valid image file"}
                     </p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground dark:text-zinc-400">
                     Optional: Upload an image file to use as the featured image.
                 </p>
 
                 {/* Uploaded Image Preview */}
                 {watch("featured_image_file") && watch("featured_image_file")?.[0] && (
-                    <div className="mt-4 p-4 border rounded-lg bg-muted/50">
-                        <p className="text-sm font-medium mb-2">Uploaded Image Preview:</p>
+                    <div className="mt-4 p-4 border border-border dark:border-zinc-600 rounded-lg bg-muted/50 dark:bg-zinc-700/50">
+                        <p className="text-sm font-medium mb-2 text-foreground dark:text-white">Uploaded Image Preview:</p>
                         <div className="relative w-full max-w-md">
                             <img
                                 src={URL.createObjectURL(watch("featured_image_file")![0])}
                                 alt="Uploaded image preview"
-                                className="w-full h-auto rounded-md border"
+                                className="w-full h-auto rounded-md border border-border dark:border-zinc-600"
                                 onLoad={(e) => {
                                     // Store the src value before setTimeout to avoid null reference
                                     const srcUrl = e.currentTarget.src;
@@ -254,41 +277,54 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
 
             {/* Featured Image URL Field */}
             <div className="space-y-2">
-                <Label htmlFor="featured_image_url">Featured Image URL</Label>
+                <Label htmlFor="featured_image_url" className="text-foreground dark:text-white">Featured Image URL</Label>
                 <Input
                     id="featured_image_url"
                     type="url"
                     placeholder="https://example.com/image.jpg"
                     {...register("featured_image_url")}
-                    className={errors.featured_image_url ? "border-destructive" : ""}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        const truncatedValue = value.length > 300 ? value.slice(0, 300) : value;
+                        setValue("featured_image_url", truncatedValue);
+                    }}
+                    className={`${errors.featured_image_url ? "border-destructive" : ""} bg-background dark:bg-zinc-700 border-border dark:border-zinc-600 text-foreground dark:text-white placeholder:text-muted-foreground dark:placeholder:text-zinc-400`}
                 />
-                {errors.featured_image_url && (
-                    <p className="text-sm text-destructive">
-                        {errors.featured_image_url.message}
+                <div className="flex justify-between">
+                    <div>
+                        {errors.featured_image_url && (
+                            <p className="text-sm text-destructive">
+                                {errors.featured_image_url.message}
+                            </p>
+                        )}
+                        <p className="text-xs text-muted-foreground dark:text-zinc-400">
+                            Optional: Provide a URL for the blog's featured image.
+                        </p>
+                    </div>
+                    <p className="text-xs text-muted-foreground dark:text-zinc-400">
+                        {watch("featured_image_url")?.length || 0}/300 characters
                     </p>
-                )}
-                <p className="text-xs text-muted-foreground">
-                    Optional: Provide a URL for the blog's featured image.
-                </p>
+                </div>
 
                 {/* Featured Image Preview */}
                 {watch("featured_image_url") && (
-                    <div className="mt-4 p-4 border rounded-lg bg-muted/50">
-                        <p className="text-sm font-medium mb-2">Featured Image Preview:</p>
+                    <div className="mt-4 p-4 border border-border dark:border-zinc-600 rounded-lg bg-muted/50 dark:bg-zinc-700/50">
+                        <p className="text-sm font-medium mb-2 text-foreground dark:text-white">Featured Image Preview:</p>
                         <div className="relative w-full max-w-md">
                             <img
                                 src={watch("featured_image_url")}
                                 alt="Featured image preview"
-                                className="w-full h-auto rounded-md border"
+                                className="w-full h-auto rounded-md border border-border dark:border-zinc-600"
                                 onError={(e) => {
                                     e.currentTarget.style.display = 'none';
                                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
                                 }}
                                 onLoad={(e) => {
+                                    e.currentTarget.style.display = 'block';
                                     e.currentTarget.nextElementSibling?.classList.add('hidden');
                                 }}
                             />
-                            <div className="hidden p-4 text-center text-sm text-muted-foreground bg-muted rounded-md border">
+                            <div className="hidden p-4 text-center text-sm text-muted-foreground dark:text-zinc-300 bg-muted dark:bg-zinc-700 rounded-md border border-border dark:border-zinc-600">
                                 Unable to load image. Please check the URL.
                             </div>
                         </div>
@@ -305,7 +341,7 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
                 />
                 <Label
                     htmlFor="archived"
-                    className="text-sm font-normal cursor-pointer"
+                    className="text-sm font-normal cursor-pointer text-foreground dark:text-white"
                 >
                     Archive this blog (it won't be publicly visible)
                 </Label>
@@ -333,6 +369,7 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
                         archived: Boolean(blog.archived),
                     })}
                     disabled={isSubmitting || updateBlogLoading}
+                    className="border-border dark:border-zinc-600 text-foreground dark:text-zinc-900 hover:bg-muted dark:hover:bg-zinc-700 hover:text-foreground dark:hover:text-white"
                 >
                     Reset to Original
                 </Button>
@@ -349,6 +386,7 @@ export default function EditBlogForm({ blog }: EditBlogFormProps) {
                         archived: false,
                     })}
                     disabled={isSubmitting || updateBlogLoading}
+                    className="border-border dark:border-zinc-600 text-foreground dark:text-zinc-900 hover:bg-muted dark:hover:bg-zinc-700 hover:text-foreground dark:hover:text-white"
                 >
                     Clear Form
                 </Button>

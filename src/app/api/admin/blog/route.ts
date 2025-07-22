@@ -12,7 +12,7 @@ const createBlogApiSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(200, "Title must be less than 200 characters"),
-  content: z.string().min(1, "Content is required"),
+  content: z.string().min(1, "Content is required").max(10000, "Content must be less than 10000 characters"),
   slug: z
     .string()
     .min(1, "Slug is required")
@@ -20,7 +20,7 @@ const createBlogApiSchema = z.object({
     .regex(
       /^[a-z0-9-]+$/,
       "Slug must be lowercase letters, numbers, and hyphens only"
-    ),
+    ).optional(),
   featured_image_url: z
     .string()
     .url("Must be a valid URL")
@@ -28,14 +28,27 @@ const createBlogApiSchema = z.object({
   archived: z.boolean().optional().default(false),
 });
 
+// Function to generate slug from title (same as in create page)
+const generateSlug = (title: string) => {
+  return title
+    .toLowerCase()
+    .replaceAll(/[^a-z0-9]/g, "-") // Replace non-alphanumeric characters with hyphens
+    .replaceAll(/-+/g, "-") // Replace multiple consecutive hyphens with single hyphen
+    .replaceAll(/^-|-$/g, "") // Remove leading and trailing hyphens
+    .slice(0, 100); // Limit to 100 characters
+};
+
 type CreateBlogApiData = z.infer<typeof createBlogApiSchema>;
 
 async function postHandler(request: MiddlewareRequest) {
   try {
     const data = request.parsedRequestBody as CreateBlogApiData;
 
+    // Auto-generate slug from title if not provided
+    const slug = data.slug || generateSlug(data.title);
+
     // Check if slug already exists
-    const existingBlog = await getBlog({ slug: data.slug });
+    const existingBlog = await getBlog({ slug: slug });
     if (existingBlog) {
       return NextResponse.json(
         {
@@ -53,7 +66,7 @@ async function postHandler(request: MiddlewareRequest) {
       .insert({
         title: data.title,
         content: data.content,
-        slug: data.slug,
+        slug: slug,
         featured_image_url: data.featured_image_url || null,
         archived: data.archived,
         updated_at: new Date().toISOString(),

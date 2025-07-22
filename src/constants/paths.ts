@@ -76,6 +76,7 @@ export const adminPaths = [
   "/admin/dashboard/blog",
   "/admin/dashboard/blog/create",
   "/admin/dashboard/api-keys",
+  "/admin/dashboard/settings",
 ];
 
 export const adminPathPrefixes = [

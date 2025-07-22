@@ -1,19 +1,21 @@
 "use client";
 
-import { Trash2, Loader, ExternalLink } from "lucide-react";
+import { Trash2, Loader, ExternalLink, Check, X } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useSupabase } from "@/context/supabase";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useSupabase, Blog } from "@/context/supabase";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { Blog } from "@/lib/supabase/admin";
 
 interface BlogTableRowProps {
   blog: Blog;
+  isSelected: boolean;
+  onSelectChange: (checked: boolean) => void;
 }
 
-export default function BlogTableRow({ blog }: BlogTableRowProps) {
+export default function BlogTableRow({ blog, isSelected, onSelectChange }: BlogTableRowProps) {
   const { deleteBlog, deleteBlogLoading } = useSupabase();
   const router = useRouter();
   const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
@@ -70,22 +72,26 @@ export default function BlogTableRow({ blog }: BlogTableRowProps) {
           router.push(`/admin/dashboard/blog/edit/${blog.id}`);
         }}
       >
-        <TableCell className="text-muted-foreground text-sm">
-          {blog.id}
+        <TableCell 
+          onClick={(e) => e.stopPropagation()}
+          className="w-[50px]"
+        >
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={onSelectChange}
+            aria-label={`Select blog ${blog.title || 'Untitled'}`}
+          />
         </TableCell>
-        <TableCell className="font-medium">
+        <TableCell className="font-medium dark:text-white">
           {blog.title || "Untitled"}
         </TableCell>
-        <TableCell className="text-sm">
-          {truncateText(blog.content, 18)}
+        <TableCell className="text-sm dark:text-zinc-200">
+          {truncateText(blog.content, 28)}
         </TableCell>
-        <TableCell className="text-muted-foreground text-sm">
-          {blog.archived ? "Yes" : "No"}
-        </TableCell>
-        <TableCell className="text-muted-foreground text-sm">
+        <TableCell className="text-muted-foreground dark:text-zinc-200 text-sm">
           {blog.slug || "-"}
         </TableCell>
-        <TableCell className="text-muted-foreground text-sm">
+        <TableCell className="text-muted-foreground dark:text-zinc-200 text-sm">
           {blog.featured_image_url ? (
             <img
               src={blog.featured_image_url}
@@ -93,16 +99,22 @@ export default function BlogTableRow({ blog }: BlogTableRowProps) {
               className="w-12 h-12 object-cover rounded"
             />
           ) : (
-            <span className="text-gray-400">-</span>
+            <span className="text-gray-400 dark:text-zinc-400">-</span>
           )}
         </TableCell>
-        <TableCell className="text-muted-foreground text-sm">
-          {formatDate(blog.created_at)}
-        </TableCell>
-        <TableCell className="text-muted-foreground text-sm">
+        <TableCell className="text-muted-foreground dark:text-zinc-200 text-sm">
           {blog.updated_at
             ? formatDate(blog.updated_at)
             : formatDate(blog.created_at)}
+        </TableCell>
+        <TableCell className="text-muted-foreground dark:text-zinc-200 text-sm">
+          <div className="flex justify-center">
+            {blog.archived ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <X className="h-4 w-4 text-red-500" />
+            )}
+          </div>
         </TableCell>
         <TableCell>
           <div className="flex items-center gap-2">

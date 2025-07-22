@@ -13,19 +13,11 @@ const updateBlogApiSchema = z.object({
     .min(1, "Title is required")
     .max(200, "Title must be less than 200 characters")
     .optional(),
-  content: z.string().min(1, "Content is required").optional(),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .max(100, "Slug must be less than 100 characters")
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug must be lowercase letters, numbers, and hyphens only"
-    )
-    .optional(),
+  content: z.string().min(1, "Content is required").max(10000, "Content must be less than 10000 characters").optional(),
   featured_image_url: z
     .string()
     .url("Must be a valid URL")
+    .max(300, "Featured image URL must be less than 300 characters")
     .optional(),
   archived: z.boolean().optional(),
 });
@@ -135,21 +127,6 @@ async function putHandler(
 
     const data = request.parsedRequestBody as UpdateBlogApiData;
 
-    // If slug is being updated, check if it's already in use by another blog
-    if (data.slug && data.slug !== existingBlog.slug) {
-      const blogWithSlug = await getBlog({ slug: data.slug });
-      if (blogWithSlug && blogWithSlug.id !== id) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: "This slug is already in use. Please choose a different slug.",
-            data: null,
-          },
-          { status: 409 }
-        );
-      }
-    }
-
     // Prepare update object - only include fields that are provided
     const updateData: any = {
       updated_at: new Date().toISOString(),
@@ -157,7 +134,6 @@ async function putHandler(
 
     if (data.title !== undefined) updateData.title = data.title;
     if (data.content !== undefined) updateData.content = data.content;
-    if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.featured_image_url !== undefined) updateData.featured_image_url = data.featured_image_url;
     if (data.archived !== undefined) updateData.archived = data.archived;
 

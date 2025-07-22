@@ -6,6 +6,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SupabaseProvider } from "@/context/supabase";
+import { ThemeProvider, useTheme } from "@/context/theme";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +23,18 @@ const jetbrainsMono = JetBrains_Mono({
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <ThemeProvider>
+      <LayoutComponent>
+        {children}
+      </LayoutComponent>
+    </ThemeProvider>
+  );
+}
+
+function LayoutComponent({ children }: { children: React.ReactNode }) {
+  const { mode } = useTheme();
+  return (
+    <html lang="en" className={mode}>
       <head className={`${inter.variable} ${jetbrainsMono.variable}`}>
         <meta
           name="viewport"
