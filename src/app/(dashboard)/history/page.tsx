@@ -95,8 +95,8 @@ const Page = () => {
   };
 
   useEffect(() => {
-    setAllGenerations(generations);
-    setFilteredGenerations(generations);
+    setAllGenerations(generations || []);
+    setFilteredGenerations(generations || []);
   }, [generations]);
 
   // Auto-refresh generations when component mounts to ensure latest images are shown
@@ -261,7 +261,11 @@ const Page = () => {
         </div>
 
         <TabsContent value="grid" className="space-y-4">
-          {filteredGenerations.length === 0 ? (
+          {getUserGenerationsLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader className="h-8 w-8 animate-spin" />
+            </div>
+          ) : filteredGenerations.length === 0 ? (
             <div className="text-center py-12">
               <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
               <h3 className="text-lg font-medium mb-2">No images found</h3>

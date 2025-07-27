@@ -84,7 +84,7 @@ export interface Generation {
 }
 
 export interface Blog {
-  id: string;
+  id: number;
   created_at: string;
   updated_at: string;
   title: string | null;
@@ -122,9 +122,9 @@ interface SupabaseContextType {
   userRole: UserRole | null;
   userTopup: UserTopup | null;
   userSubscription: UserSubscription | null;
-  generations: Generation[];
+  generations: Generation[] | null;
   blogs: Blog[];
-  apiKeys: ApiKey[];
+  apiKeys: ApiKey[] | null;
   adminApiKeys: AdminApiKey[];
   changePasswordEmail: string | null;
   setChangePasswordEmail: (email: string) => void;
@@ -182,9 +182,9 @@ interface SupabaseContextType {
   getUserGenerationsLoading: boolean;
   getBlogs: ({ archived }: { archived?: boolean }) => Promise<boolean>;
   getBlogsLoading: boolean;
-  deleteBlogs: ({ blogIds }: { blogIds: string[] }) => Promise<boolean>;
+  deleteBlogs: ({ blogIds }: { blogIds: number[] }) => Promise<boolean>;
   deleteBlogsLoading: boolean;
-  updateBlogs: ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } }) => Promise<boolean>;
+  updateBlogs: ({ blogIds, values }: { blogIds: number[]; values: { archived: boolean } }) => Promise<boolean>;
   updateBlogsLoading: boolean;
   getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise<Blog | null>;
   getBlogLoading: boolean;
@@ -203,7 +203,7 @@ interface SupabaseContextType {
   }) => Promise<boolean>;
   createBlogLoading: boolean;
   updateBlog: (
-    id: string,
+    id: number,
     {
       title,
       content,
@@ -219,7 +219,7 @@ interface SupabaseContextType {
     }
   ) => Promise<boolean>;
   updateBlogLoading: boolean;
-  deleteBlog: (id: string) => Promise<boolean>;
+  deleteBlog: (id: number) => Promise<boolean>;
   deleteBlogLoading: boolean;
   getApiKeys: () => Promise<boolean>;
   getApiKeysLoading: boolean;
@@ -306,9 +306,9 @@ const SupabaseContext = createContext<SupabaseContextType>({
   userRole: null,
   userTopup: null,
   userSubscription: null,
-  generations: [],
+  generations: null,
   blogs: [],
-  apiKeys: [],
+  apiKeys: null,
   adminApiKeys: [],
   changePasswordEmail: null,
   setChangePasswordEmail: () => { },
@@ -328,28 +328,28 @@ const SupabaseContext = createContext<SupabaseContextType>({
   login: () => Promise.resolve(false),
   loginLoading: false,
   getSession: () => Promise.resolve(false),
-  getSessionLoading: false,
+  getSessionLoading: true,
   getAuthUser: () => Promise.resolve(false),
-  getAuthUserLoading: false,
+  getAuthUserLoading: true,
   getUserProfile: () => Promise.resolve(false),
-  getUserProfileLoading: false,
+  getUserProfileLoading: true,
   getUserRole: () => Promise.resolve(null),
-  getUserRoleLoading: false,
+  getUserRoleLoading: true,
   getUserTopup: () => Promise.resolve(false),
-  getUserTopupLoading: false,
+  getUserTopupLoading: true,
   getUserSubscription: () => Promise.resolve(false),
-  getUserSubscriptionLoading: false,
+  getUserSubscriptionLoading: true,
   logout: (options?: { redirectTo: string }) => Promise.resolve(false),
   logoutLoading: false,
   deleteUser: () => Promise.resolve(false),
   deleteUserLoading: false,
   getUserGenerations: () => Promise.resolve(false),
-  getUserGenerationsLoading: false,
+  getUserGenerationsLoading: true,
   getBlogs: ({ archived }: { archived?: boolean } = {}) => Promise.resolve(false),
   getBlogsLoading: false,
-  deleteBlogs: ({ blogIds }: { blogIds: string[] } = { blogIds: [] }) => Promise.resolve(false),
+  deleteBlogs: ({ blogIds }: { blogIds: number[] } = { blogIds: [] }) => Promise.resolve(false),
   deleteBlogsLoading: false,
-  updateBlogs: ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } } = { blogIds: [], values: { archived: false } }) => Promise.resolve(false),
+  updateBlogs: ({ blogIds, values }: { blogIds: number[]; values: { archived: boolean } } = { blogIds: [], values: { archived: false } }) => Promise.resolve(false),
   updateBlogsLoading: false,
   getBlog: ({ id, slug }: { id?: string; slug?: string }) => Promise.resolve(null),
   getBlogLoading: false,
@@ -360,7 +360,7 @@ const SupabaseContext = createContext<SupabaseContextType>({
   deleteBlog: () => Promise.resolve(false),
   deleteBlogLoading: false,
   getApiKeys: () => Promise.resolve(false),
-  getApiKeysLoading: false,
+  getApiKeysLoading: true,
   updateUserProfile: () => Promise.resolve(false),
   updateUserProfileLoading: false,
   addApiKey: () => Promise.resolve(false),
@@ -402,9 +402,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [userTopup, setUserTopup] = useState<UserTopup | null>(null);
   const [userSubscription, setUserSubscription] =
     useState<UserSubscription | null>(null);
-  const [generations, setGenerations] = useState<Generation[]>([]);
+  const [generations, setGenerations] = useState<Generation[] | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKey[] | null>(null);
   const [adminApiKeys, setAdminApiKeys] = useState<AdminApiKey[]>([]);
   const [changePasswordEmail, setChangePasswordEmail] = useState<string | null>(
     null
@@ -419,22 +419,22 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
   const [updateAuthUserLoading, setUpdateAuthUserLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [getSessionLoading, setGetSessionLoading] = useState<boolean>(false);
-  const [getAuthUserLoading, setGetAuthUserLoading] = useState<boolean>(false);
+  const [getSessionLoading, setGetSessionLoading] = useState<boolean>(true);
+  const [getAuthUserLoading, setGetAuthUserLoading] = useState<boolean>(true);
   const [getUserProfileLoading, setGetUserProfileLoading] =
-    useState<boolean>(false);
-  const [getUserRoleLoading, setGetUserRoleLoading] = useState<boolean>(false);
+    useState<boolean>(true);
+  const [getUserRoleLoading, setGetUserRoleLoading] = useState<boolean>(true);
   const [updateUserProfileLoading, setUpdateUserProfileLoading] =
     useState(false);
 
   const [getUserTopupLoading, setGetUserTopupLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [getUserSubscriptionLoading, setGetUserSubscriptionLoading] =
-    useState<boolean>(false);
+    useState<boolean>(true);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [deleteUserLoading, setDeleteUserLoading] = useState(false);
   const [getUserGenerationsLoading, setGetUserGenerationsLoading] =
-    useState(false);
+    useState(true);
   const [getBlogsLoading, setGetBlogsLoading] = useState(false);
   const [deleteBlogsLoading, setDeleteBlogsLoading] = useState(false);
   const [updateBlogsLoading, setUpdateBlogsLoading] = useState(false);
@@ -442,7 +442,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   const [createBlogLoading, setCreateBlogLoading] = useState(false);
   const [updateBlogLoading, setUpdateBlogLoading] = useState(false);
   const [deleteBlogLoading, setDeleteBlogLoading] = useState(false);
-  const [getApiKeysLoading, setGetApiKeysLoading] = useState(false);
+  const [getApiKeysLoading, setGetApiKeysLoading] = useState(true);
   const [addApiKeyLoading, setAddApiKeyLoading] = useState(false);
   const [updateApiKeyLoading, setUpdateApiKeyLoading] = useState(false);
   const [getAdminApiKeysLoading, setGetAdminApiKeysLoading] = useState(false);
@@ -1446,9 +1446,9 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
       setUserRole(null);
       setUserTopup(null);
       setUserSubscription(null);
-      setGenerations([]);
+      setGenerations(null);
       setBlogs([]);
-      setApiKeys([]);
+      setApiKeys(null);
       setAdminApiKeys([]);
       removeUserSubscriptionCookie();
       removeUserRoleCookie();
@@ -1573,7 +1573,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      setGenerations([]);
+      setGenerations(null);
 
       return false;
     } finally {
@@ -1638,10 +1638,10 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const deleteBlogs = async ({ blogIds }: { blogIds: string[] }) => {
+  const deleteBlogs = async ({ blogIds }: { blogIds: number[] }) => {
     try {
       setDeleteBlogsLoading(true);
-
+      
       if (!session?.accessToken) {
         throw new Error("Session not found", {
           cause: session,
@@ -1704,7 +1704,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateBlogs = async ({ blogIds, values }: { blogIds: string[]; values: { archived: boolean } }) => {
+  const updateBlogs = async ({ blogIds, values }: { blogIds: number[]; values: { archived: boolean } }) => {
     try {
       setUpdateBlogsLoading(true);
 
@@ -1926,7 +1926,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateBlog = async (
-    id: string,
+    id: number,
     {
       title,
       content,
@@ -2036,7 +2036,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const deleteBlog = async (id: string) => {
+  const deleteBlog = async (id: number) => {
     try {
       if (!session?.accessToken) {
         throw new Error("Session not found", {
@@ -2153,7 +2153,7 @@ export const SupabaseProvider = ({ children }: { children: ReactNode }) => {
         });
       }
 
-      setApiKeys([]);
+      setApiKeys(null);
 
       return false;
     } finally {

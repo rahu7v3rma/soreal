@@ -165,7 +165,7 @@ export default function AdminDashboardLayout({
 
       <div
         className="flex flex-col flex-1 w-full transition-all duration-300"
-        style={{ marginLeft: "var(--sidebar-width, 240px)" }}
+        style={{ marginLeft: collapsed ? "70px" : "240px" }}
       >
         <div className="h-16 bg-background dark:bg-zinc-800 text-foreground dark:text-white w-full flex items-center z-10">
           <div className="sticky top-0 right-0 w-full bg-background/95 dark:bg-zinc-800/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:supports-[backdrop-filter]:bg-zinc-800/60 z-50 border-b dark:border-zinc-600">
@@ -208,7 +208,7 @@ export default function AdminDashboardLayout({
             </div>
           </div>
         </div>
-        <main className="flex-1 w-full overflow-visible">
+        <main className="flex-1 w-full overflow-visible bg-white dark:bg-zinc-800">
           <div className="container h-full px-3 md:px-4 max-w-7xl mx-auto py-6 md:py-8 pb-12 bg-white dark:bg-zinc-800 text-foreground dark:text-white">
             {children}
           </div>

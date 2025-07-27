@@ -50,8 +50,15 @@ const currentYear = currentDate.getFullYear();
 const currentMonth = currentDate.getMonth();
 
 const Page = () => {
-  const { userTopup, generations, userSubscription, totalCredits } =
-    useSupabase();
+  const { 
+    userTopup, 
+    generations, 
+    userSubscription, 
+    totalCredits,
+    getUserTopupLoading,
+    getUserGenerationsLoading,
+    getUserSubscriptionLoading 
+  } = useSupabase();
   const {
     requestTopupStripeCheckoutSession,
     requestTopupStripeCheckoutSessionLoading,
@@ -82,11 +89,11 @@ const Page = () => {
 
   const enterpriseRef = useRef<HTMLDivElement>(null);
 
-  const totalSpent = generations.reduce((total, generation) => {
+  const totalSpent = (generations || []).reduce((total, generation) => {
     return total + (generation.credit_requirement || 0);
   }, 0);
 
-  const thisMonthSpent = generations.reduce((total, generation) => {
+  const thisMonthSpent = (generations || []).reduce((total, generation) => {
     const generationDate = new Date(generation.created_at);
     if (
       generationDate.getFullYear() === currentYear &&
@@ -237,7 +244,11 @@ const Page = () => {
                       className="text-6xl font-bold"
                       id="billing-credit-amount"
                     >
-                      {totalCredits?.toLocaleString() || "0"}
+                      {getUserTopupLoading || getUserSubscriptionLoading ? (
+                        <Loader className="h-16 w-16 animate-spin mx-auto" />
+                      ) : (
+                        totalCredits?.toLocaleString() || "0"
+                      )}
                     </div>
                   </div>
 
@@ -258,7 +269,11 @@ const Page = () => {
                               </div>
                             </div>
                             <div className="text-3xl font-bold text-gray-900 mb-1">
-                              {totalSpent.toLocaleString()}
+                              {getUserGenerationsLoading ? (
+                                <Loader className="h-6 w-6 animate-spin mx-auto" />
+                              ) : (
+                                totalSpent.toLocaleString()
+                              )}
                             </div>
                             <div className="text-xs text-gray-400">
                               All Time Credits
@@ -274,7 +289,11 @@ const Page = () => {
                               </div>
                             </div>
                             <div className="text-3xl font-bold text-gray-900 mb-1">
-                              {thisMonthSpent.toLocaleString()}
+                              {getUserGenerationsLoading ? (
+                                <Loader className="h-6 w-6 animate-spin mx-auto" />
+                              ) : (
+                                thisMonthSpent.toLocaleString()
+                              )}
                             </div>
                             <div className="text-xs text-gray-400">
                               Current Period
@@ -290,7 +309,9 @@ const Page = () => {
                               Credits Reset On
                             </span>
                             <span className="font-medium text-gray-900">
-                              {userSubscription?.planName &&
+                              {getUserSubscriptionLoading ? (
+                                <Loader className="h-4 w-4 animate-spin" />
+                              ) : userSubscription?.planName &&
                               userSubscription?.creditResetDate
                                 ? new Date(
                                     userSubscription.creditResetDate
@@ -308,11 +329,17 @@ const Page = () => {
                                 Subscription Credits Remaining
                               </span>
                               <span className="font-medium text-gray-900">
-                                {userSubscription?.creditBalance?.toLocaleString()}
-                                {" out of "}
-                                {planCredits[
-                                  userSubscription?.planName as keyof typeof planCredits
-                                ].toLocaleString()}
+                                {getUserSubscriptionLoading ? (
+                                  <Loader className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <>
+                                    {userSubscription?.creditBalance?.toLocaleString()}
+                                    {" out of "}
+                                    {planCredits[
+                                      userSubscription?.planName as keyof typeof planCredits
+                                    ].toLocaleString()}
+                                  </>
+                                )}
                               </span>
                             </div>
                           )}
@@ -321,8 +348,11 @@ const Page = () => {
                               Top-up Credits Remaining
                             </span>
                             <span className="font-medium text-gray-900">
-                              {userTopup?.creditBalance?.toLocaleString() ||
-                                "0"}
+                              {getUserTopupLoading ? (
+                                <Loader className="h-4 w-4 animate-spin" />
+                              ) : (
+                                userTopup?.creditBalance?.toLocaleString() || "0"
+                              )}
                             </span>
                           </div>
                           <div className="text-center text-xs text-gray-600 mt-4">
@@ -671,7 +701,11 @@ const Page = () => {
         </TabsContent>
 
         <TabsContent value="subscription" className="space-y-4">
-          {userSubscription?.planName && userSubscription?.billingCycle && (
+          {getUserSubscriptionLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader className="h-8 w-8 animate-spin" />
+            </div>
+          ) : userSubscription?.planName && userSubscription?.billingCycle && (
             <div className="mt-12 mb-8">
               <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-200/50 shadow-sm">
                 <div className="mb-6">
@@ -794,7 +828,7 @@ const Page = () => {
             </div>
           )}
 
-          {((!userSubscription?.planName && !userSubscription?.billingCycle) ||
+          {!getUserSubscriptionLoading && ((!userSubscription?.planName && !userSubscription?.billingCycle) ||
             changingPlan) && (
             <div id="subscription-plans" className="mb-12">
               <h2 className="text-2xl font-bold mb-6 text-center">

@@ -10,12 +10,18 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useSupabase } from "@/context/supabase";
-import { Image as ImageIcon, Zap } from "lucide-react";
+import { Image as ImageIcon, Zap, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
   const router = useRouter();
-  const { generations, totalCredits } = useSupabase();
+  const { 
+    generations, 
+    totalCredits, 
+    getUserTopupLoading, 
+    getUserSubscriptionLoading, 
+    getUserGenerationsLoading 
+  } = useSupabase();
 
   return (
     <div className="space-y-6 w-full">
@@ -37,7 +43,11 @@ const Page = () => {
                 <ImageIcon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{generations.length}</div>
+                {getUserGenerationsLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <div className="text-2xl font-bold">{generations?.length || 0}</div>
+                )}
               </CardContent>
             </Card>
 
@@ -49,9 +59,13 @@ const Page = () => {
                 <Zap className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {totalCredits?.toLocaleString() || "0"}
-                </div>
+                {getUserTopupLoading || getUserSubscriptionLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    {totalCredits?.toLocaleString() || "0"}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -65,48 +79,56 @@ const Page = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {generations.length > 0 &&
-                    generations.slice(0, 8).map((image, index) => (
-                      <div
-                        key={index}
-                        className="aspect-square rounded-md overflow-hidden relative"
-                      >
-                        <img
-                          src={image.public_url || ""}
-                          alt={image.prompt || "Generated image"}
-                          className="object-cover w-full h-full"
-                        />
+                {getUserGenerationsLoading ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {generations && generations.length > 0 &&
+                      generations.slice(0, 8).map((image, index) => (
+                        <div
+                          key={index}
+                          className="aspect-square rounded-md overflow-hidden relative"
+                        >
+                          <img
+                            src={image.public_url || ""}
+                            alt={image.prompt || "Generated image"}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      ))}
+                  </div>
+                )}
+                {!getUserGenerationsLoading && (
+                  <div className="mt-4">
+                    {!generations || generations.length === 0 ? (
+                      <div className="text-center py-12">
+                        <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
+                        <h3 className="text-lg font-medium mb-2">
+                          No images found
+                        </h3>
+                        <p className="text-muted-foreground mb-6">
+                          You haven't generated any images yet
+                        </p>
+                        <Button onClick={() => router.push("/create")}>
+                          Create Your First Image
+                        </Button>
                       </div>
-                    ))}
-                </div>
-                <div className="mt-4">
-                  {generations.length === 0 ? (
-                    <div className="text-center py-12">
-                      <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-                      <h3 className="text-lg font-medium mb-2">
-                        No images found
-                      </h3>
-                      <p className="text-muted-foreground mb-6">
-                        You haven't generated any images yet
-                      </p>
-                      <Button onClick={() => router.push("/create")}>
-                        Create Your First Image
-                      </Button>
-                    </div>
-                  ) : (
-                    <CardDescription>
-                      Check out all your generations in the
-                      <span
-                        className="text-primary cursor-pointer ml-1"
-                        onClick={() => router.push("/history")}
-                      >
-                        History
-                      </span>{" "}
-                      page.
-                    </CardDescription>
-                  )}
-                </div>
+                    ) : (
+                      <CardDescription>
+                        Check out all your generations in the
+                        <span
+                          className="text-primary cursor-pointer ml-1"
+                          onClick={() => router.push("/history")}
+                        >
+                          History
+                        </span>{" "}
+                        page.
+                      </CardDescription>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

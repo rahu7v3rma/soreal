@@ -22,7 +22,7 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
 
     useEffect(() => {
         const fetchBlog = async () => {
-            if (!previewBlog) {
+            if (!previewBlog && id !== "create") {
                 try {
                     const blog = await getBlog({ id });
                     setFallbackBlog(blog);
@@ -55,7 +55,7 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
                 <div className="flex flex-col gap-2">
                     <h1 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">Preview Blog</h1>
                     <p className="text-muted-foreground dark:text-zinc-300 text-red-600">
-                        Blog not found or failed to load.
+                        {id === "create" ? "No preview data available. Please go back to create form." : "Blog not found or failed to load."}
                     </p>
                 </div>
             </div>
@@ -72,7 +72,11 @@ export default function PreviewBlogPage({ params }: PreviewBlogPageProps) {
     const featuredImageUrl = getFeaturedImageUrl();
 
     const handleClosePreview = () => {
-        router.push(`/admin/dashboard/blog/edit/${id}`);
+        if (id === "create") {
+            router.push('/admin/dashboard/blog/create');
+        } else {
+            router.push(`/admin/dashboard/blog/edit/${id}`);
+        }
     };
 
     return (

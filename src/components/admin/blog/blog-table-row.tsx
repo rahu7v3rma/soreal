@@ -18,10 +18,10 @@ interface BlogTableRowProps {
 export default function BlogTableRow({ blog, isSelected, onSelectChange }: BlogTableRowProps) {
   const { deleteBlog, deleteBlogLoading } = useSupabase();
   const router = useRouter();
-  const [deletingBlogId, setDeletingBlogId] = useState<string | null>(null);
+  const [deletingBlogId, setDeletingBlogId] = useState<number | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<{
-    id: string;
+    id: number;
     title: string | null;
   } | null>(null);
 
@@ -39,7 +39,7 @@ export default function BlogTableRow({ blog, isSelected, onSelectChange }: BlogT
     return text.substring(0, maxLength) + "...";
   };
 
-  const handleDelete = (blogId: string, blogTitle: string | null) => {
+  const handleDelete = (blogId: number, blogTitle: string | null) => {
     setBlogToDelete({ id: blogId, title: blogTitle });
     setDeleteDialogOpen(true);
   };

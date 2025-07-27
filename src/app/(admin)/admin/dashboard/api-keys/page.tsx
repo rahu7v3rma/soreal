@@ -27,7 +27,7 @@ import { useSupabase } from "@/context/supabase";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AlertCircle, Copy, Key, Loader, Plus, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Page = () => {
   const { toast } = useToast();
@@ -51,6 +51,9 @@ const Page = () => {
     useState(false);
   const [newApiKeyPermissionRemoveBlog, setNewApiKeyPermissionRemoveBlog] =
     useState(false);
+  const [newApiKeyPermissionListBlog, setNewApiKeyPermissionListBlog] =
+    useState(false);
+  const [selectAllPermissions, setSelectAllPermissions] = useState(false);
 
   const handleCopyApiKey = (key: string) => {
     navigator.clipboard
@@ -76,6 +79,7 @@ const Page = () => {
     if (newApiKeyPermissionGetBlog) permissions.push("get_blog");
     if (newApiKeyPermissionUpdateBlog) permissions.push("update_blog");
     if (newApiKeyPermissionRemoveBlog) permissions.push("remove_blog");
+    if (newApiKeyPermissionListBlog) permissions.push("list_blog");
 
     addAdminApiKey({
       permissions,
@@ -88,9 +92,29 @@ const Page = () => {
         setNewApiKeyPermissionGetBlog(false);
         setNewApiKeyPermissionUpdateBlog(false);
         setNewApiKeyPermissionRemoveBlog(false);
+        setNewApiKeyPermissionListBlog(false);
+        setSelectAllPermissions(false);
         getAdminApiKeys();
       }
     });
+  };
+
+  // Update select all state when individual permissions change
+  useEffect(() => {
+    const allSelected = newApiKeyPermissionCreateBlog && 
+                       newApiKeyPermissionGetBlog && 
+                       newApiKeyPermissionUpdateBlog && 
+                       newApiKeyPermissionRemoveBlog && 
+                       newApiKeyPermissionListBlog;
+    setSelectAllPermissions(allSelected);
+  }, [newApiKeyPermissionCreateBlog, newApiKeyPermissionGetBlog, newApiKeyPermissionUpdateBlog, newApiKeyPermissionRemoveBlog, newApiKeyPermissionListBlog]);
+
+  const handleSelectAllPermissions = (checked: boolean) => {
+    setNewApiKeyPermissionCreateBlog(checked);
+    setNewApiKeyPermissionGetBlog(checked);
+    setNewApiKeyPermissionUpdateBlog(checked);
+    setNewApiKeyPermissionRemoveBlog(checked);
+    setNewApiKeyPermissionListBlog(checked);
   };
 
   const revokeApiKey = async (apiKeyId: string) => {
@@ -155,6 +179,18 @@ const Page = () => {
                   <div className="space-y-2">
                     <Label className="text-foreground dark:text-white">Permissions</Label>
                     <div className="space-y-2">
+                      <div className="flex items-center gap-2 pb-2 border-b border-border dark:border-zinc-600">
+                        <Checkbox
+                          id="select-all-permissions"
+                          checked={selectAllPermissions}
+                          onCheckedChange={(checked) => {
+                            if (typeof checked === "boolean") {
+                              handleSelectAllPermissions(checked);
+                            }
+                          }}
+                        />
+                        <Label htmlFor="select-all-permissions" className="text-foreground dark:text-white font-medium">Select All</Label>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Checkbox
                           id="permission-create-blog"
@@ -203,6 +239,18 @@ const Page = () => {
                         />
                         <Label htmlFor="permission-remove-blog" className="text-foreground dark:text-white">Remove blog</Label>
                       </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="permission-list-blog"
+                          checked={newApiKeyPermissionListBlog}
+                          onCheckedChange={(checked) => {
+                            if (typeof checked === "boolean") {
+                              setNewApiKeyPermissionListBlog(checked);
+                            }
+                          }}
+                        />
+                        <Label htmlFor="permission-list-blog" className="text-foreground dark:text-white">List blog</Label>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -220,7 +268,7 @@ const Page = () => {
                     disabled={
                       addAdminApiKeyLoading || 
                       !newApiKeyName.trim() || 
-                      (!newApiKeyPermissionCreateBlog && !newApiKeyPermissionGetBlog && !newApiKeyPermissionUpdateBlog && !newApiKeyPermissionRemoveBlog)
+                      (!newApiKeyPermissionCreateBlog && !newApiKeyPermissionGetBlog && !newApiKeyPermissionUpdateBlog && !newApiKeyPermissionRemoveBlog && !newApiKeyPermissionListBlog)
                     }
                   >
                     {addAdminApiKeyLoading ? (
@@ -292,7 +340,7 @@ const Page = () => {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-xs text-foreground dark:text-white">
+                                <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-xs text-foreground dark:text-white w-[100px] inline-block text-center">
                                   {apiKey.api_key_token.substring(0, 8)}...
                                   {apiKey.api_key_token.substring(
                                     apiKey.api_key_token.length - 4
@@ -332,7 +380,7 @@ const Page = () => {
                                     size="sm"
                                     onClick={() => revokeApiKey(apiKey.id)}
                                     disabled={updateAdminApiKeyLoading}
-                                    className="text-foreground dark:text-white hover:bg-muted dark:hover:bg-zinc-700"
+                                    className="text-foreground dark:text-white hover:bg-muted dark:hover:bg-zinc-700 border-border !dark:border-zinc-600"
                                   >
                                     {updateAdminApiKeyLoading ? (
                                       <>
@@ -524,6 +572,138 @@ const Page = () => {
                     </CardContent>
                   </Card>
 
+                  {/* Create Multiple Blogs */}
+                  <Card className="border-l-4 border-l-green-500 bg-card dark:bg-zinc-800 border-border dark:border-zinc-600">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-foreground dark:text-white">Create Multiple Blogs</CardTitle>
+                        <Badge className="bg-green-600">POST</Badge>
+                      </div>
+                      <CardDescription className="text-muted-foreground dark:text-zinc-300">
+                        URL: <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-sm text-foreground dark:text-white">https://soreal.app/api/admin/blog/multiple</code>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 bg-card dark:bg-zinc-800">
+                      <p className="text-foreground dark:text-white">Create multiple blog posts in a single request. Existing slugs will be returned without creating duplicates.</p>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Required Request Body Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs</TableCell>
+                                <TableCell className="text-foreground dark:text-white">array</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Array of blog objects to create</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].title</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Blog title (max 200 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].content</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Blog content (max 10000 characters)</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Optional Request Body Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].slug</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">URL slug (lowercase, numbers, hyphens only, max 100 characters). Auto-generated from title if not provided.</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].featured_image_url</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">URL to featured image (max 300 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].archived</TableCell>
+                                <TableCell className="text-foreground dark:text-white">boolean</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Whether blog is archived (default: false)</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Request</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "blogs": [
+    {
+      "title": "First Blog Post",
+      "content": "Content of the first blog post...",
+      "slug": "first-blog-post",
+      "featured_image_url": "https://example.com/image1.jpg",
+      "archived": false
+    },
+    {
+      "title": "Second Blog Post",
+      "content": "Content of the second blog post...",
+      "featured_image_url": "https://example.com/image2.jpg"
+    }
+  ]
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Response</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "success": true,
+  "message": "Multiple blogs processed successfully",
+  "data": {
+    "existingSlugs": [
+      {
+        "title": "First Blog Post",
+        "slug": "first-blog-post"
+      }
+    ],
+    "createdBlogs": [
+      {
+        "id": "clx789def012",
+        "title": "Second Blog Post",
+        "content": "Content of the second blog post...",
+        "slug": "second-blog-post",
+        "featured_image_url": "https://example.com/image2.jpg",
+        "archived": false,
+        "created_at": "2024-01-01T12:00:00.000Z",
+        "updated_at": "2024-01-01T12:00:00.000Z"
+      }
+    ]
+  }
+}`}
+                        </pre>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                 </TabsContent>
 
                 {/* Get Blog Tab */}
@@ -580,6 +760,103 @@ const Page = () => {
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
   }
+}`}
+                        </pre>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* List Blogs */}
+                  <Card className="border-l-4 border-l-blue-500 bg-card dark:bg-zinc-800 border-border dark:border-zinc-600">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-foreground dark:text-white">List Blogs</CardTitle>
+                        <Badge className="bg-blue-600">GET</Badge>
+                      </div>
+                      <CardDescription className="text-muted-foreground dark:text-zinc-300">
+                        URL: <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-sm text-foreground dark:text-white">https://soreal.app/api/admin/blog</code>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 bg-card dark:bg-zinc-800">
+                      <p className="text-foreground dark:text-white">Retrieve a paginated list of blog posts with optional search and sorting.</p>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Optional Query Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Default</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">page</TableCell>
+                                <TableCell className="text-foreground dark:text-white">number</TableCell>
+                                <TableCell className="text-foreground dark:text-white">1</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Page number (minimum: 1)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">limit</TableCell>
+                                <TableCell className="text-foreground dark:text-white">number</TableCell>
+                                <TableCell className="text-foreground dark:text-white">10</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Items per page (1-100)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">search</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">-</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Search term (max 100 chars, searches title, content, slug)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">sort</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">latest</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Sort order: "latest" or "oldest"</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Request</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`GET /api/admin/blog?page=1&limit=5&search=tutorial&sort=latest`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Response</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "success": true,
+  "message": "Blogs retrieved successfully",
+  "data": [
+    {
+      "id": "clx123abc456",
+      "title": "React Tutorial",
+      "content": "Learn React basics...",
+      "slug": "react-tutorial",
+      "featured_image_url": "https://example.com/react.jpg",
+      "archived": false,
+      "created_at": "2024-01-01T12:00:00.000Z",
+      "updated_at": "2024-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "clx789def012",
+      "title": "JavaScript Tutorial",
+      "content": "JavaScript fundamentals...",
+      "slug": "javascript-tutorial",
+      "featured_image_url": null,
+      "archived": false,
+      "created_at": "2024-01-01T11:00:00.000Z",
+      "updated_at": "2024-01-01T11:30:00.000Z"
+    }
+  ]
 }`}
                         </pre>
                       </div>
@@ -674,6 +951,179 @@ const Page = () => {
                     </CardContent>
                   </Card>
 
+                  {/* Update Multiple Blogs */}
+                  <Card className="border-l-4 border-l-amber-500 bg-card dark:bg-zinc-800 border-border dark:border-zinc-600">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-foreground dark:text-white">Update Multiple Blogs</CardTitle>
+                        <Badge className="bg-amber-600">PUT</Badge>
+                      </div>
+                      <CardDescription className="text-muted-foreground dark:text-zinc-300">
+                        URL: <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-sm text-foreground dark:text-white">https://soreal.app/api/admin/blog</code>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 bg-card dark:bg-zinc-800">
+                      <p className="text-foreground dark:text-white">Update multiple blog posts in a single request. Blogs without IDs, with invalid IDs, or with slug conflicts will be separated in the response.</p>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Required Request Body Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs</TableCell>
+                                <TableCell className="text-foreground dark:text-white">array</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Array of blog objects to update</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Optional Request Body Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].id</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Blog ID to update (max 100 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].title</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Updated blog title (max 200 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].content</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Updated blog content (max 10000 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].slug</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Updated URL slug (lowercase, numbers, hyphens only, max 100 characters)</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].featured_image_url</TableCell>
+                                <TableCell className="text-foreground dark:text-white">string</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Updated featured image URL</TableCell>
+                              </TableRow>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogs[].archived</TableCell>
+                                <TableCell className="text-foreground dark:text-white">boolean</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Updated archive status</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Request</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "blogs": [
+    {
+      "id": "clx123abc456",
+      "title": "Complete Updated Blog Post",
+      "content": "This is a comprehensive update with all fields modified...",
+      "slug": "complete-updated-blog-post",
+      "featured_image_url": "https://example.com/updated-complete-image.jpg",
+      "archived": false
+    },
+    {
+      "title": "Blog Without ID",
+      "content": "This blog object has no ID field and will be categorized separately...",
+      "slug": "blog-without-id",
+      "featured_image_url": "https://example.com/no-id-image.jpg",
+      "archived": false
+    },
+    {
+      "id": "nonexistent123",
+      "title": "Blog with Invalid ID",
+      "content": "This blog has an ID that doesn't exist in the database...",
+      "archived": true
+    },
+    {
+      "id": "clx789def012",
+      "title": "Blog with Slug Conflict",
+      "content": "This blog update will cause a slug conflict...",
+      "slug": "existing-slug-in-database",
+      "featured_image_url": "https://example.com/conflict-image.jpg"
+    }
+  ]
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Response</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "success": true,
+  "message": "Successfully processed blog update request",
+  "data": {
+    "blogsWithoutId": [
+      {
+        "title": "Blog Without ID",
+        "content": "This blog object has no ID field and will be categorized separately...",
+        "slug": "blog-without-id",
+        "featured_image_url": "https://example.com/no-id-image.jpg",
+        "archived": false
+      }
+    ],
+    "blogsWithInvalidId": [
+      {
+        "id": "nonexistent123",
+        "title": "Blog with Invalid ID",
+        "content": "This blog has an ID that doesn't exist in the database...",
+        "archived": true
+      }
+    ],
+    "blogsWithSlugConflict": [
+      {
+        "id": "clx789def012",
+        "title": "Blog with Slug Conflict",
+        "content": "This blog update will cause a slug conflict...",
+        "slug": "existing-slug-in-database",
+        "featured_image_url": "https://example.com/conflict-image.jpg"
+      }
+    ],
+    "updatedBlogs": [
+      {
+        "id": "clx123abc456",
+        "title": "Complete Updated Blog Post",
+        "content": "This is a comprehensive update with all fields modified...",
+        "slug": "complete-updated-blog-post",
+        "featured_image_url": "https://example.com/updated-complete-image.jpg",
+        "archived": false,
+        "created_at": "2024-01-01T12:00:00.000Z",
+        "updated_at": "2024-01-01T12:45:00.000Z"
+      }
+    ]
+  }
+}`}
+                        </pre>
+                      </div>
+                    </CardContent>
+                  </Card>
+
                 </TabsContent>
 
                 {/* Delete Blog Tab */}
@@ -728,6 +1178,90 @@ const Page = () => {
 }`}
                         </pre>
                       </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Delete Multiple Blogs */}
+                  <Card className="border-l-4 border-l-red-500 bg-card dark:bg-zinc-800 border-border dark:border-zinc-600">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg text-foreground dark:text-white">Delete Multiple Blogs</CardTitle>
+                        <Badge className="bg-red-600">DELETE</Badge>
+                      </div>
+                      <CardDescription className="text-muted-foreground dark:text-zinc-300">
+                        URL: <code className="bg-muted dark:bg-zinc-700 px-2 py-1 rounded text-sm text-foreground dark:text-white">https://soreal.app/api/admin/blog</code>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4 bg-card dark:bg-zinc-800">
+                      <p className="text-foreground dark:text-white">Delete multiple blog posts in a single request.</p>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Required Request Body Parameters</h4>
+                        <div className="rounded-md border border-border dark:border-zinc-600">
+                          <Table>
+                            <TableHeader>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableHead className="text-foreground dark:text-white">Parameter</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Type</TableHead>
+                                <TableHead className="text-foreground dark:text-white">Description</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              <TableRow className="border-b border-border dark:border-zinc-600">
+                                <TableCell className="font-mono text-foreground dark:text-white">blogIds</TableCell>
+                                <TableCell className="text-foreground dark:text-white">number[]</TableCell>
+                                <TableCell className="text-foreground dark:text-white">Array of blog IDs to delete (min: 1, max: 10)</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Request</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "blogIds": [123, 456, 789]
+}`}
+                        </pre>
+                      </div>
+
+                      <div>
+                        <h4 className="font-medium mb-2 text-foreground dark:text-white">Example Response</h4>
+                        <pre className="bg-muted dark:bg-zinc-700 p-3 rounded-md font-mono text-sm overflow-auto text-foreground dark:text-white border border-border dark:border-zinc-600">
+{`{
+  "success": true,
+  "message": "Successfully processed blog deletion request",
+  "data": {
+    "validIds": [123, 456],
+    "invalidIds": [789],
+    "deletedBlogs": [
+      {
+        "id": "123",
+        "title": "First Blog Post",
+        "content": "Content of first blog...",
+        "slug": "first-blog-post",
+        "featured_image_url": "https://example.com/image1.jpg",
+        "archived": false,
+        "created_at": "2024-01-01T10:00:00.000Z",
+        "updated_at": "2024-01-01T10:00:00.000Z"
+      },
+      {
+        "id": "456",
+        "title": "Second Blog Post",
+        "content": "Content of second blog...",
+        "slug": "second-blog-post",
+        "featured_image_url": null,
+        "archived": true,
+        "created_at": "2024-01-02T10:00:00.000Z",
+        "updated_at": "2024-01-02T10:00:00.000Z"
+      }
+    ]
+  }
+}`}
+                        </pre>
+                      </div>
+
                     </CardContent>
                   </Card>
 

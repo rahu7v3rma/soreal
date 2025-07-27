@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/toast";
 import { useSupabase } from "@/context/supabase";
+import { useAdminBlog } from "@/context/admin-blog";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -54,9 +55,33 @@ type CreateBlogFormData = z.infer<typeof createBlogSchema>;
 export default function CreateBlogPage() {
   const { toast } = useToast();
   const { uploadImage, createBlog, createBlogLoading, getBlog } = useSupabase();
+  const { previewBlog, setPreviewBlog } = useAdminBlog();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSlugEditable, setIsSlugEditable] = useState(false);
+
+  // Use preview data if available to restore form state when returning from preview
+  const getInitialValues = () => {
+    if (previewBlog) {
+      return {
+        title: previewBlog.title || "",
+        content: previewBlog.content || "",
+        slug: previewBlog.slug || "",
+        featured_image_file: previewBlog.featured_image_file || undefined,
+        featured_image_url: previewBlog.featured_image_url || "",
+        archived: Boolean(previewBlog.archived),
+      };
+    }
+    // Default empty values for new blog creation
+    return {
+      title: "",
+      content: "",
+      slug: "",
+      featured_image_file: undefined,
+      featured_image_url: "",
+      archived: false,
+    };
+  };
 
   const {
     register,
@@ -67,14 +92,7 @@ export default function CreateBlogPage() {
     watch,
   } = useForm<CreateBlogFormData>({
     resolver: zodResolver(createBlogSchema),
-    defaultValues: {
-      title: "",
-      content: "",
-      slug: "",
-      featured_image_file: undefined,
-      featured_image_url: "",
-      archived: false,
-    },
+    defaultValues: getInitialValues(),
   });
 
   // Function to generate slug from title
@@ -91,6 +109,9 @@ export default function CreateBlogPage() {
   const titleValue = watch("title");
   const contentValue = watch("content");
   const featuredImageUrlValue = watch("featured_image_url");
+  
+  // Watch all form values for preview functionality
+  const watchedValues = watch();
   useEffect(() => {
     if (titleValue) {
       const newSlug = generateSlug(titleValue);
@@ -374,6 +395,26 @@ export default function CreateBlogPage() {
             className="min-w-[120px]"
           >
             {isSubmitting || createBlogLoading ? "Creating..." : "Create Blog"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => {
+              setPreviewBlog({
+                title: watchedValues.title,
+                content: watchedValues.content,
+                slug: watchedValues.slug,
+                featured_image_file: watchedValues.featured_image_file,
+                featured_image_url: watchedValues.featured_image_url || undefined,
+                archived: watchedValues.archived,
+              });
+              router.replace('/admin/dashboard/blog/preview/create');
+            }}
+            disabled={isSubmitting || createBlogLoading || !titleValue?.trim() || !contentValue?.trim()}
+            className="min-w-[120px]"
+          >
+            Preview Blog
           </Button>
 
           <Button

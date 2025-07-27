@@ -12,7 +12,10 @@ export const validateRequestBodyMiddleware = (zodSchema: ZodSchema) => {
       if (!parsedRequestBody.success) {
         throw new Error("Invalid request body", {
           cause: {
-            responseData: parsedRequestBody.error.flatten().fieldErrors,
+            responseData: {
+              formErrors: parsedRequestBody.error.flatten().formErrors,
+              fieldErrors: parsedRequestBody.error.flatten().fieldErrors,
+            },
           },
         });
       }

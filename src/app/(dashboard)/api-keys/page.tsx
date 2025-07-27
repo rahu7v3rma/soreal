@@ -214,7 +214,7 @@ const Page = () => {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Your API Keys ({apiKeys.length})</CardTitle>
+              <CardTitle>Your API Keys ({apiKeys?.length || 0})</CardTitle>
               <CardDescription>
                 Manage your API keys for programmatic access to Soreal
               </CardDescription>
@@ -238,7 +238,7 @@ const Page = () => {
                     <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
                     <p className="text-muted-foreground">Loading API keys...</p>
                   </div>
-                ) : apiKeys.length === 0 ? (
+                ) : !apiKeys || apiKeys.length === 0 ? (
                   <div className="text-center py-6">
                     <Key className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" />
                     <h3 className="text-lg font-medium mb-2">No API Keys</h3>
@@ -258,7 +258,7 @@ const Page = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {apiKeys.map((apiKey) => (
+                      {apiKeys?.map((apiKey) => (
                         <TableRow key={apiKey.id}>
                           <TableCell className="font-medium">
                             {apiKey.key_name}

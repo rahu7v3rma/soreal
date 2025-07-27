@@ -83,7 +83,7 @@ const Page = () => {
     try {
       setDownloadUserDataLoading(true);
 
-      const csvString = generateExportCsv(generations);
+      const csvString = generateExportCsv(generations || []);
 
       const dataBlob = new Blob([csvString], {
         type: "text/csv;charset=utf-8;",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Search, Clock, Trash2, Archive } from "lucide-react";
+import { Plus, Search, Clock, Trash2, Archive, RefreshCw } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Table,
@@ -38,12 +38,12 @@ export const revalidate = 0;
 const blogsPerPage = 5;
 
 export default function AdminBlogsPage() {
-  const { blogs, getBlogsLoading, deleteBlogs, deleteBlogsLoading, updateBlogs, updateBlogsLoading } = useSupabase();
+  const { blogs, getBlogsLoading, deleteBlogs, deleteBlogsLoading, updateBlogs, updateBlogsLoading, getBlogs } = useSupabase();
   const [blogsPage, setBlogsPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [filteredBlogs, setFilteredBlogs] = useState<typeof blogs>([]);
-  const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
 
   // Update filtered blogs when blogs or search query changes
   useEffect(() => {
@@ -83,7 +83,7 @@ export default function AdminBlogsPage() {
   const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage);
 
   // Handle individual row selection
-  const handleRowSelect = (blogId: string, checked: boolean) => {
+  const handleRowSelect = (blogId: number, checked: boolean) => {
     if (checked) {
       setSelectedRows(prev => [...prev, blogId]);
     } else {
@@ -129,6 +129,11 @@ export default function AdminBlogsPage() {
     if (success) {
       setSelectedRows([]); // Clear selection after successful delete
     }
+  };
+
+  // Handle refresh action
+  const handleRefresh = async () => {
+    await getBlogs({ });
   };
 
   return (
@@ -189,6 +194,15 @@ export default function AdminBlogsPage() {
           >
             <Trash2 className="h-4 w-4" />
             <span>{deleteBlogsLoading ? 'Deleting...' : 'Delete'}</span>
+          </Button>
+          <Button
+            disabled={getBlogsLoading}
+            variant="outline"
+            className="flex items-center gap-2 bg-background dark:bg-zinc-700 text-foreground dark:text-zinc-100 border-border dark:border-zinc-600"
+            onClick={handleRefresh}
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span>{getBlogsLoading ? 'Refreshing...' : 'Refresh'}</span>
           </Button>
           <Link href="/admin/dashboard/blog/create">
             <Button

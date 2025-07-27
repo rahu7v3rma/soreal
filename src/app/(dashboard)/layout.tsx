@@ -26,6 +26,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Loader2,
   LogOut,
   Zap,
 } from "lucide-react";
@@ -43,6 +44,10 @@ function Layout({ children }: { children: React.ReactNode }) {
     totalCredits,
     userSubscription,
     isSubscriptionExpired,
+    getUserTopupLoading,
+    getUserSubscriptionLoading,
+    getAuthUserLoading,
+    getUserProfileLoading,
   } = useSupabase();
   const pathname = usePathname();
 
@@ -167,6 +172,21 @@ function Layout({ children }: { children: React.ReactNode }) {
                     )}
                   </React.Fragment>
                 ))}
+              
+              {getUserSubscriptionLoading && (
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "w-full justify-start mb-1 relative",
+                    collapsed ? "px-2" : "px-3"
+                  )}
+                  size={collapsed ? "icon" : "default"}
+                  disabled
+                >
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  {!collapsed && <span className="ml-2">Loading...</span>}
+                </Button>
+              )}
             </nav>
           </div>
 
@@ -178,14 +198,23 @@ function Layout({ children }: { children: React.ReactNode }) {
                     href="/billing"
                     className="relative whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 overflow-hidden border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm rounded-md flex items-center justify-center gap-3 px-4 py-1 h-9"
                   >
-                    {totalCredits < 100 ? (
-                      <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    {getUserTopupLoading || getUserSubscriptionLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="font-medium">Loading...</span>
+                      </>
                     ) : (
-                      <Zap className="h-4 w-4" />
+                      <>
+                        {totalCredits < 100 ? (
+                          <AlertTriangle className="h-4 w-4 text-orange-500" />
+                        ) : (
+                          <Zap className="h-4 w-4" />
+                        )}
+                        <span className="font-medium">
+                          {totalCredits.toLocaleString()} Credits
+                        </span>
+                      </>
                     )}
-                    <span className="font-medium">
-                      {totalCredits.toLocaleString()} Credits
-                    </span>
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent
@@ -266,39 +295,45 @@ function Layout({ children }: { children: React.ReactNode }) {
 
       <div
         className="flex flex-col flex-1 w-full transition-all duration-300"
-        style={{ marginLeft: "var(--sidebar-width, 240px)" }}
+        style={{ marginLeft: collapsed ? "70px" : "240px" }}
       >
         <div className="h-16 bg-background w-full flex items-center z-10">
           <div className="sticky top-0 right-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b">
             <div className="h-16 flex items-center justify-end px-4 max-w-full">
               <div className="flex items-center gap-3 pr-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button type="button" className="focus:outline-none">
-                      <div className="flex items-center gap-2 py-2 rounded-md hover:bg-muted/30 cursor-pointer transition-colors">
-                        <Avatar>
-                          <AvatarImage
-                            src={userProfile?.avatarUrl || ""}
-                            alt={authUser?.email || ""}
-                          />
-                          <AvatarFallback className="bg-teal-500 text-white">
-                            {userProfile?.username
-                              ?.substring(0, 2)
-                              .toUpperCase() || "US"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex flex-col items-start">
-                          <div className="font-medium text-xs">
-                            {userProfile?.username || "User"}
+                {getAuthUserLoading || getUserProfileLoading ? (
+                  <div className="flex items-center gap-2 py-2">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Loading...</span>
+                  </div>
+                ) : (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button type="button" className="focus:outline-none">
+                        <div className="flex items-center gap-2 py-2 rounded-md hover:bg-muted/30 cursor-pointer transition-colors">
+                          <Avatar>
+                            <AvatarImage
+                              src={userProfile?.avatarUrl || ""}
+                              alt={authUser?.email || ""}
+                            />
+                            <AvatarFallback className="bg-teal-500 text-white">
+                              {userProfile?.username
+                                ?.substring(0, 2)
+                                .toUpperCase() || "US"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex flex-col items-start">
+                            <div className="font-medium text-xs">
+                              {userProfile?.username || "User"}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground">
+                              Personal Account
+                            </div>
                           </div>
-                          <div className="text-[10px] text-muted-foreground">
-                            Personal Account
-                          </div>
+                          <ChevronDown className="h-3 w-3 text-muted-foreground ml-1" />
                         </div>
-                        <ChevronDown className="h-3 w-3 text-muted-foreground ml-1" />
-                      </div>
-                    </button>
-                  </DropdownMenuTrigger>
+                      </button>
+                    </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -310,8 +345,9 @@ function Layout({ children }: { children: React.ReactNode }) {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => logout()}>Logout</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>
